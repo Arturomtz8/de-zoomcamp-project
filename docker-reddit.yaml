@@ -1,0 +1,55 @@
+###
+### A complete description of a Prefect Deployment for flow 'scrape-reddit'
+###
+name: docker-reddit
+description: null
+version: 53bdb92a6d49b1e059d71f1c3e42fe99
+# The work queue that will handle this deployment's runs
+work_queue_name: test
+tags: []
+parameters: {}
+schedule: null
+infra_overrides: {}
+
+###
+### DO NOT EDIT BELOW THIS LINE
+###
+flow_name: scrape-reddit
+manifest_path: null
+infrastructure:
+  type: docker-container
+  env:
+    EXTRA_PIP_PACKAGES: pandas==1.5.2 praw==7.6.1 pyarrow==10.0.1 prefect-gcp[cloud_storage]==0.2.4
+  labels: {}
+  name: null
+  command: null
+  image: prefecthq/prefect:2.7.7-python3.9
+  image_pull_policy: null
+  image_registry: null
+  networks: []
+  network_mode: null
+  auto_remove: true
+  volumes: []
+  stream_output: true
+  _block_document_id: 59895ec6-8bbc-44d5-8d61-b07b2b36ecb5
+  _block_document_name: docker-reddit
+  _is_anonymous: false
+  block_type_slug: docker-container
+  _block_type_slug: docker-container
+storage:
+  repository: https://github.com/Arturomtz8/de-zoomcamp.git
+  reference: main
+  access_token: null
+  _block_document_id: 177f5308-3999-4f59-9db5-4619473f3d0a
+  _block_document_name: git-docker
+  _is_anonymous: false
+  block_type_slug: github
+  _block_type_slug: github
+path: ''
+entrypoint: proto-project/proto_main.py:scrape_reddit
+parameter_openapi_schema:
+  title: Parameters
+  type: object
+  properties: {}
+  required: null
+  definitions: null

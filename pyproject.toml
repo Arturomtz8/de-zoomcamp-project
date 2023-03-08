@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "de-zoomcamp"
+version = "0.1.0"
+description = ""
+authors = ["Arturomtz8 <arturo.mtz8@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+pyarrow = "10.0.1"
+pandas = "1.5.2"
+prefect = "2.7.7"
+prefect-gcp = {version = "0.2.4", extras = ["cloud_storage"]}
+protobuf = "4.21.11"
+greenlet = "^2.0.1"
+praw = "^7.6.1"
+certifi = "2022.12.07"
+pandas-gbq = "^0.19.1"
+
+
+
+[tool.poetry.dev-dependencies]
+pytest = "7.2.0"
+black = "^22.12.0"
+isort = "^5.11.4"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
