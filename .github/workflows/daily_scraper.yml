@@ -1,0 +1,69 @@
+name: Scrape daily subreddit
+
+# on:
+#   schedule:
+#     - cron: '0 18 * * *'
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+      REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+      REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Run image
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: "1.1.15"
+    - name: Install poetry dependencies
+      run: poetry install
+    # - name: Install nltk dependencies
+    #   run: |
+    #     poetry run python -m nltk.downloader punkt stopwords wordnet omw-1.4
+    - name: Run black
+      run: |
+        poetry run black .
+    - name: Run isort
+      run: |
+        poetry run isort .
+    - name: Prefect Cloud login
+      run: |
+        poetry run prefect config set PREFECT_API_KEY=${{secrets.PREFECT_API_KEY}} 
+        poetry run prefect cloud workspace set --workspace "${{secrets.PREFECT_WORKSPACE}}"
+    - name: Run python script
+      run: |
+        poetry run python src/reddit_scraper.py
+    - name: Add & Commit
+      if: always()
+      uses: EndBug/add-and-commit@v9.1.1
+      with:
+          # The arguments for the `git add` command (see the paragraph below for more info)
+          # Default: '.'
+          add: '.'
+
+          # The name of the user that will be displayed as the author of the commit.
+          # Default: depends on the default_author input
+          author_name: Arturo Martínez
+
+          # The email of the user that will be displayed as the author of the commit.
+          # Default: depends on the default_author input
+          author_email: ${{ secrets.EMAIL }}
+
+          # The message for the commit.
+          # Default: 'Commit from GitHub Actions (name of the workflow)'
+          message: 'daily run'
+
+          # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
+          # Default: true
+          push: true
+

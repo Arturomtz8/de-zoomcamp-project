@@ -12,7 +12,7 @@ prefect = "2.7.7"
 prefect-gcp = {version = "0.2.4", extras = ["cloud_storage"]}
 protobuf = "4.21.11"
 greenlet = "^2.0.1"
-praw = "^7.6.1"
+praw = "7.7.0"
 certifi = "2022.12.07"
 pandas-gbq = "^0.19.1"
 
