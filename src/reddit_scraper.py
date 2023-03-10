@@ -137,6 +137,7 @@ def write_local(df: pd.DataFrame) -> Path:
     local_path.parent.mkdir(parents=True, exist_ok=True)
     print(df.shape)
     df.to_parquet(local_path, compression="gzip")
+    df.to_csv("test.csv", index=False)
     return local_path
 
 
@@ -151,7 +152,7 @@ def scrape_reddit():
     gcs_bucket_path = Secret.load("bucket-zoomcamp-path")
     gcs_bucket_path = gcs_bucket_path.get()
     df_from_bucket = read_from_gcs(gcs_bucket_path)
-    df_raw = extract_posts("Ghoststories", df_from_bucket)
+    df_raw = extract_posts("Ghoststories+Ghosts+Paranormal+ParanormalEncounters", df_from_bucket)
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_from_bucket)
     local_path = write_local(concatenated_df)
