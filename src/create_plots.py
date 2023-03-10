@@ -1,4 +1,3 @@
-
 import os
 from collections import Counter
 
@@ -11,19 +10,29 @@ from nltk.stem import WordNetLemmatizer
 # This allows to create individual objects from a bog of words
 from nltk.tokenize import word_tokenize
 from wordcloud import WordCloud
-import os
-
 
 PATH_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "ghost_stories")
 IMG_PATH_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "img")
 stopwords_personalized = nltk.corpus.stopwords.words("english")
-new_stopwords = ["u", "/u", "would", "could", "get", "got", "even", "said", "wa", "around", "still"]
+new_stopwords = [
+    "u",
+    "/u",
+    "would",
+    "could",
+    "get",
+    "got",
+    "even",
+    "said",
+    "wa",
+    "around",
+    "still",
+]
 stopwords_personalized.extend(new_stopwords)
 
 
-def word_freq(column_name: str)-> pd.DataFrame:
+def word_freq(column_name: str) -> pd.DataFrame:
     df_posts = pd.read_parquet(f"{PATH_FILE}/posts_ghosts_stories.parquet")
-    posts_text_string = ''.join(df_posts[column_name].tolist())
+    posts_text_string = "".join(df_posts[column_name].tolist())
     # creates tokens, creates lower class, removes numbers and lemmatizes the words
     new_tokens = word_tokenize(posts_text_string)
     new_tokens = [t.lower() for t in new_tokens]
@@ -35,7 +44,9 @@ def word_freq(column_name: str)-> pd.DataFrame:
     word_counter_df = pd.DataFrame(
         counted.items(), columns=[f"words_in_{column_name}", "frequency"]
     ).sort_values(by="frequency", ascending=False)
-    word_counter_df = word_counter_df[~word_counter_df[f"words_in_{column_name}"].isin(stopwords_personalized)]
+    word_counter_df = word_counter_df[
+        ~word_counter_df[f"words_in_{column_name}"].isin(stopwords_personalized)
+    ]
     print(word_counter_df)
     word_counter_df.to_csv(
         os.path.join(PATH_FILE, f"word_counter_{column_name}.csv"),
@@ -45,7 +56,7 @@ def word_freq(column_name: str)-> pd.DataFrame:
     return word_counter_df
 
 
-def create_graph(df: pd.DataFrame)->None:
+def create_graph(df: pd.DataFrame) -> None:
     fig, axes = plt.subplots()
     fig.suptitle("Data taken from r/Ghoststories")  # or plt.suptitle('Main title')
     if "words_in_post_title" in list(df.columns):
@@ -60,9 +71,11 @@ def create_graph(df: pd.DataFrame)->None:
     plt.close()
 
 
-def create_wordcloud(column_name:str):
-    df_posts: pd.DataFrame = pd.read_parquet(f"{PATH_FILE}/posts_ghosts_stories.parquet")
-    posts_text_string: str =  ''.join(df_posts[column_name].to_list())
+def create_wordcloud(column_name: str):
+    df_posts: pd.DataFrame = pd.read_parquet(
+        f"{PATH_FILE}/posts_ghosts_stories.parquet"
+    )
+    posts_text_string: str = "".join(df_posts[column_name].to_list())
 
     wordcloud = WordCloud(
         colormap="ocean", background_color="gold", min_font_size=10
