@@ -20,8 +20,6 @@ def read_from_gcs(gcs_path: str) -> pd.DataFrame:
     return df
 
 
-
-
 @task(tags="extract reddit posts")
 def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataFrame:
     all_posts_list = list()
