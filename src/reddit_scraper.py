@@ -1,4 +1,5 @@
 import io
+import sys
 from pathlib import Path
 from typing import List
 
@@ -7,7 +8,6 @@ import praw
 from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect_gcp.cloud_storage import GcsBucket
-import sys
 
 
 @task(log_prints=True)
