@@ -10,11 +10,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
-      REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
-      REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
-      REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
+    # env:
+    #   REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+    #   REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+    #   REDDIT_USERNAME: ${{ secrets.REDDIT_USERNAME }}
+    #   REDDIT_USER_AGENT: ${{ secrets.REDDIT_USER_AGENT }}
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.9
