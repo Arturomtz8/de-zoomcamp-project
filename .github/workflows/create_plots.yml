@@ -1,12 +1,12 @@
 name: Create plots
 
-# on:
-#   schedule:
-#     - cron: '40 18 * * *'
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '40 18 * * *'
+# on:
+#   push:
+#     branches:
+#       - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,12 +25,12 @@ jobs:
     - name: Install nltk dependencies
       run: |
         poetry run python -m nltk.downloader punkt stopwords wordnet omw-1.4
-    - name: Run black
-      run: |
-        poetry run black .
-    - name: Run isort
-      run: |
-        poetry run isort .
+    # - name: Run black
+    #   run: |
+    #     poetry run black .
+    # - name: Run isort
+    #   run: |
+    #     poetry run isort .
     - name: Prefect Cloud login
       run: |
         poetry run prefect config set PREFECT_API_KEY=${{secrets.PREFECT_API_KEY}} 
