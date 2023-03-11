@@ -1,12 +1,12 @@
-name: Scrape daily subreddit
+name: Create plots
 
-on:
-  schedule:
-    - cron: '0 6,18 * * *'
 # on:
-#   push:
-#     branches:
-#       - main
+#   schedule:
+#     - cron: '40 18 * * *'
+on:
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,6 +22,9 @@ jobs:
         poetry-version: "1.1.15"
     - name: Install poetry dependencies
       run: poetry install
+    - name: Install nltk dependencies
+      run: |
+        poetry run python -m nltk.downloader punkt stopwords wordnet omw-1.4
     - name: Run black
       run: |
         poetry run black .
@@ -34,9 +37,9 @@ jobs:
         poetry run prefect cloud workspace set --workspace "${{secrets.PREFECT_WORKSPACE}}"
     - name: Run python script
       run: |
-        poetry run python src/reddit_scraper.py
+        poetry run python src/create_plots.py
     - name: Add & Commit
-      if: always()
+      # if: always()
       uses: EndBug/add-and-commit@v9.1.1
       with:
           # The arguments for the `git add` command (see the paragraph below for more info)
@@ -53,7 +56,7 @@ jobs:
 
           # The message for the commit.
           # Default: 'Commit from GitHub Actions (name of the workflow)'
-          message: 'scrape daily'
+          message: 'create plots daily'
 
           # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
           # Default: true

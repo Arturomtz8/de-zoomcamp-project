@@ -1,5 +1,4 @@
 import io
-import sys
 from pathlib import Path
 from typing import List
 
@@ -20,7 +19,7 @@ def read_from_gcs(gcs_path: str) -> pd.DataFrame:
     return df
 
 
-@task(tags="extract reddit posts")
+@task(tags="extract reddit posts", log_prints=True)
 def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataFrame:
     all_posts_list = list()
     post_ids_list_in_gcs = df_from_bucket["post_id"].tolist()
