@@ -1,12 +1,12 @@
 name: Scrape daily subreddit
 
-# on:
-#   schedule:
-#     - cron: '0 6,18 * * *'
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '0 6,18 * * *'
+# on:
+#   push:
+#     branches:
+#       - main
 jobs:
   build:
     runs-on: ubuntu-latest
