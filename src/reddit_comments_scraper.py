@@ -1,19 +1,22 @@
 import io
+import pickle
 from pathlib import Path
-from typing import List
-from praw.models import MoreComments
+from typing import List, Tuple
+
 import pandas as pd
 import praw
 import prawcore
-from typing import Tuple
+from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from prefect_gcp.cloud_storage import GcsBucket
 from prefect.filesystems import GCS
-import pickle
+from prefect_gcp.cloud_storage import GcsBucket
+
 
 @task(log_prints=True)
-def convert_bytes_to_df(posts_content: bytes, comments_content: bytes) -> Tuple[pd.DataFrame, pd.DataFrame]:
+def convert_bytes_to_df(
+    posts_content: bytes, comments_content: bytes
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_posts = pd.read_parquet((io.BytesIO(posts_content)))
     df_comments = pd.read_parquet((io.BytesIO(comments_content)))
     # print(df_comments)
@@ -22,7 +25,9 @@ def convert_bytes_to_df(posts_content: bytes, comments_content: bytes) -> Tuple[
 
 
 @task(tags="extract reddit comments", log_prints=True)
-def extract_comments(df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame) -> pd.DataFrame:
+def extract_comments(
+    df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
+) -> pd.DataFrame:
     comments_ids_list_in_gcs = df_comments_from_bucket["comment_id"].to_list()
     all_comments_list = list()
     REDDIT_CLIENT_ID = Secret.load("reddit-client-id")
@@ -39,7 +44,10 @@ def extract_comments(df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket
         try:
             submission = reddit.submission(url=post_url)
             for top_level_comment in submission.comments:
-                if isinstance(top_level_comment, MoreComments) or top_level_comment.id in comments_ids_list_in_gcs:
+                if (
+                    isinstance(top_level_comment, MoreComments)
+                    or top_level_comment.id in comments_ids_list_in_gcs
+                ):
                     continue
                 print(top_level_comment.body)
                 #   if str(submission.id) not in post_ids_list_in_gcs:
@@ -64,9 +72,8 @@ def extract_comments(df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket
                     "is_author_submitter": bool(is_submitter),
                     "post_id": str(post_id),
                     "link_comment": str(link_comment),
-                    "comment_score": float(score)
+                    "comment_score": float(score),
                 }
-
 
                 all_comments_list.append(dict_post_preview)
         except (praw.exceptions.InvalidURL, prawcore.exceptions.NotFound) as e:
@@ -83,10 +90,6 @@ def extract_comments(df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket
     return df_comments_raw
 
 
-
-      
-
-
 @task(log_prints=True)
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df["created_at"] = pd.to_datetime(df["created_at"], unit="s")
@@ -94,7 +97,9 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @task(log_prints=True)
-def concat_df(new_df: pd.DataFrame, df_comments_from_bucket: pd.DataFrame) -> pd.DataFrame:
+def concat_df(
+    new_df: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
+) -> pd.DataFrame:
     concatenated_df = pd.concat([df_comments_from_bucket, new_df])
     return concatenated_df
 
@@ -119,10 +124,10 @@ def scrape_reddit_comments():
     gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
     posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
     comments_content = gcs_block.read_path("comments_ghosts_stories.parquet")
-    df_posts_from_bucket, df_comments_from_bucket = convert_bytes_to_df(posts_content, comments_content)
-    df_raw = extract_comments(
-       df_posts_from_bucket, df_comments_from_bucket
+    df_posts_from_bucket, df_comments_from_bucket = convert_bytes_to_df(
+        posts_content, comments_content
     )
+    df_raw = extract_comments(df_posts_from_bucket, df_comments_from_bucket)
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)
     local_path = write_local(concatenated_df)

@@ -6,8 +6,8 @@ import pandas as pd
 import praw
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from prefect_gcp.cloud_storage import GcsBucket
 from prefect.filesystems import GCS
+from prefect_gcp.cloud_storage import GcsBucket
 
 
 @task(log_prints=True)
@@ -145,16 +145,17 @@ def write_to_gcs(local_path: Path, gcs_bucket_path: str) -> None:
 
 @flow()
 def scrape_reddit():
-    gcs_block: GCS= GCS.load("ghost-stories-bucket-path")
+    gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
     posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
     df_posts_from_bucket = convert_bytes_to_df(posts_content)
     df_raw = extract_posts(
-        subreddit_name="Ghoststories+Ghosts+Paranormal+ParanormalEncounters", df_from_bucket=df_posts_from_bucket
+        subreddit_name="Ghoststories+Ghosts+Paranormal+ParanormalEncounters",
+        df_from_bucket=df_posts_from_bucket,
     )
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_posts_from_bucket)
     local_path = write_local(concatenated_df)
-    write_to_gcs(local_path= local_path, gcs_bucket_path=local_path)
+    write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
 
 
 if __name__ == "__main__":
