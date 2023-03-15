@@ -1,12 +1,12 @@
-name: Scrape daily subreddit
+name: Scrape daily comments of posts
 
-on:
-  schedule:
-    - cron: '0 6,18 * * *'
 # on:
-#   push:
-#     branches:
-#       - main
+#   schedule:
+#     - cron: '0 18 20 * * *'
+on:
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -22,19 +22,13 @@ jobs:
         poetry-version: "1.1.15"
     - name: Install poetry dependencies
       run: poetry install
-    - name: Run black
-      run: |
-        poetry run black .
-    - name: Run isort
-      run: |
-        poetry run isort .
     - name: Prefect Cloud login
       run: |
         poetry run prefect config set PREFECT_API_KEY=${{secrets.PREFECT_API_KEY}} 
         poetry run prefect cloud workspace set --workspace "${{secrets.PREFECT_WORKSPACE}}"
     - name: Run python script
       run: |
-        poetry run python src/reddit_scraper.py
+        poetry run python src/reddit_comments_scraper.py
     - name: Add & Commit
       if: always()
       uses: EndBug/add-and-commit@v9.1.1
@@ -53,7 +47,7 @@ jobs:
 
           # The message for the commit.
           # Default: 'Commit from GitHub Actions (name of the workflow)'
-          message: 'scrape daily'
+          message: 'scrape daily comments of posts'
 
           # Whether to push the commit and, if any, its tags to the repo. It can also be used to set the git push arguments (see the paragraph below for more info)
           # Default: true

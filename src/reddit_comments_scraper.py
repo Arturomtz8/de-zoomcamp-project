@@ -40,7 +40,7 @@ def extract_comments(
         user_agent=REDDIT_USER_AGENT.get(),
         username=REDDIT_USERNAME.get(),
     )
-    for post_url in df_posts_from_bucket["post_url"][:1]:
+    for post_url in df_posts_from_bucket["post_url"]:
         try:
             submission = reddit.submission(url=post_url)
             for top_level_comment in submission.comments:
@@ -49,8 +49,7 @@ def extract_comments(
                     or top_level_comment.id in comments_ids_list_in_gcs
                 ):
                     continue
-                print(top_level_comment.body)
-                #   if str(submission.id) not in post_ids_list_in_gcs:
+
                 author = top_level_comment.author
                 comment_id = top_level_comment.id
                 body = top_level_comment.body
