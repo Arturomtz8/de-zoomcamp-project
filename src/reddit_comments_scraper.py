@@ -85,7 +85,6 @@ def extract_comments(
     if df_comments_raw.empty:
         print("no new data available")
         raise Exception("no new data available")
-    # df_comments_raw.to_csv("test.csv")
     return df_comments_raw
 
 
