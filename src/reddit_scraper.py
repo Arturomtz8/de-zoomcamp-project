@@ -7,16 +7,15 @@ import praw
 from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect_gcp.cloud_storage import GcsBucket
+from prefect.filesystems import GCS
 
 
 @task(log_prints=True)
-def read_from_gcs(gcs_path: str) -> pd.DataFrame:
-    gcs_block = GcsBucket.load("bucket-zoomcamp")
-    contents = gcs_block.read_path(gcs_path)
-    df = pd.read_parquet((io.BytesIO(contents)))
-    print(df.shape)
-    # df.to_csv("test.csv")
-    return df
+def convert_bytes_to_df(posts_content: bytes) -> pd.DataFrame:
+    df_posts = pd.read_parquet((io.BytesIO(posts_content)))
+
+    print(df_posts.shape)
+    return df_posts
 
 
 @task(tags="extract reddit posts", log_prints=True)
@@ -125,8 +124,8 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
 
 
 @task(log_prints=True)
-def concat_df(new_df: pd.DataFrame, df_from_bucket: pd.DataFrame) -> pd.DataFrame:
-    concatenated_df = pd.concat([df_from_bucket, new_df])
+def concat_df(new_df: pd.DataFrame, df_posts_from_bucket: pd.DataFrame) -> pd.DataFrame:
+    concatenated_df = pd.concat([df_posts_from_bucket, new_df])
     return concatenated_df
 
 
@@ -134,9 +133,7 @@ def concat_df(new_df: pd.DataFrame, df_from_bucket: pd.DataFrame) -> pd.DataFram
 def write_local(df: pd.DataFrame) -> Path:
     local_path = Path(f"data/ghost_stories/posts_ghosts_stories.parquet")
     local_path.parent.mkdir(parents=True, exist_ok=True)
-    print(df.shape)
     df.to_parquet(local_path, compression="gzip")
-    df.to_csv("test.csv", index=False)
     return local_path
 
 
@@ -148,16 +145,16 @@ def write_to_gcs(local_path: Path, gcs_bucket_path: str) -> None:
 
 @flow()
 def scrape_reddit():
-    gcs_bucket_path = Secret.load("bucket-zoomcamp-path")
-    gcs_bucket_path = gcs_bucket_path.get()
-    df_from_bucket = read_from_gcs(gcs_bucket_path)
+    gcs_block: GCS= GCS.load("ghost-stories-bucket-path")
+    posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
+    df_posts_from_bucket = convert_bytes_to_df(posts_content)
     df_raw = extract_posts(
-        "Ghoststories+Ghosts+Paranormal+ParanormalEncounters", df_from_bucket
+        subreddit_name="Ghoststories+Ghosts+Paranormal+ParanormalEncounters", df_from_bucket=df_posts_from_bucket
     )
     new_df = clean_df(df_raw)
-    concatenated_df = concat_df(new_df, df_from_bucket)
+    concatenated_df = concat_df(new_df, df_posts_from_bucket)
     local_path = write_local(concatenated_df)
-    write_to_gcs(local_path, gcs_bucket_path)
+    write_to_gcs(local_path= local_path, gcs_bucket_path=local_path)
 
 
 if __name__ == "__main__":
