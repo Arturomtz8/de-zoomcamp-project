@@ -1,5 +1,4 @@
 import io
-import pickle
 from pathlib import Path
 from typing import List, Tuple
 
@@ -19,8 +18,7 @@ def convert_bytes_to_df(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_posts = pd.read_parquet((io.BytesIO(posts_content)))
     df_comments = pd.read_parquet((io.BytesIO(comments_content)))
-    # print(df_comments)
-
+    print(df_comments.shape)
     return df_posts, df_comments
 
 
@@ -28,7 +26,12 @@ def convert_bytes_to_df(
 def extract_comments(
     df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
 ) -> pd.DataFrame:
-    comments_ids_list_in_gcs = df_comments_from_bucket["comment_id"].to_list()
+    # deleted users or posts have none post_url
+    df_comments_from_bucket.drop_duplicates(subset=["body", "created_at"], keep="first", inplace=True)
+    print(df_comments_from_bucket.shape)
+    df_comments_from_bucket = df_comments_from_bucket[df_comments_from_bucket["post_url"].notnull()]
+    print(df_comments_from_bucket.shape)
+    posts_id_from_comments_list_in_gcs = df_comments_from_bucket["post_id"].to_list()
     all_comments_list = list()
     REDDIT_CLIENT_ID = Secret.load("reddit-client-id")
     REDDIT_CLIENT_SECRET = Secret.load("reddit-client-secret")
@@ -40,46 +43,48 @@ def extract_comments(
         user_agent=REDDIT_USER_AGENT.get(),
         username=REDDIT_USERNAME.get(),
     )
-    for post_url in df_posts_from_bucket["post_url"]:
-        try:
-            submission = reddit.submission(url=post_url)
-            for top_level_comment in submission.comments:
-                if (
-                    isinstance(top_level_comment, MoreComments)
-                    or top_level_comment.id in comments_ids_list_in_gcs
-                ):
-                    continue
+    for post_id in df_posts_from_bucket["post_fullname"]:
+        if post_id not in posts_id_from_comments_list_in_gcs:
+            try:
+                submission = reddit.submission(post_id)
+                for top_level_comment in submission.comments:
+                    if (
+                        isinstance(top_level_comment, MoreComments)
+                    ):
+                        continue
+                    print("new comments found")        
+                    author = top_level_comment.author
+                    comment_id = top_level_comment.id
+                    submission_url = top_level_comment.submission.url
+                    body = top_level_comment.body
+                    created_at = top_level_comment.created_utc
+                    distinguished = top_level_comment.distinguished
+                    edited = top_level_comment.edited
+                    is_submitter = top_level_comment.is_submitter
+                    post_id = top_level_comment.link_id
+                    link_comment = top_level_comment.permalink
+                    score = top_level_comment.score
 
-                author = top_level_comment.author
-                comment_id = top_level_comment.id
-                body = top_level_comment.body
-                created_at = top_level_comment.created_utc
-                distinguished = top_level_comment.distinguished
-                edited = top_level_comment.edited
-                is_submitter = top_level_comment.is_submitter
-                post_id = top_level_comment.link_id
-                link_comment = top_level_comment.permalink
-                score = top_level_comment.score
-
-                dict_post_preview = {
-                    "author": str(author),
-                    "comment_id": str(comment_id),
-                    "body": str(body),
-                    "created_at": float(created_at),
-                    "distinguished": bool(distinguished),
-                    "edited": bool(edited),
-                    "is_author_submitter": bool(is_submitter),
-                    "post_id": str(post_id),
-                    "link_comment": str(link_comment),
-                    "comment_score": float(score),
-                }
-
-                all_comments_list.append(dict_post_preview)
-        except (praw.exceptions.InvalidURL, prawcore.exceptions.NotFound) as e:
-            """
-            Some url posts are images, or gifs or maybe the post was deleted
-            """
-            continue
+                    dict_post_preview = {
+                        "author": str(author),
+                        "comment_id": str(comment_id),
+                        "post_url": str(submission_url),
+                        "body": str(body),
+                        "created_at": float(created_at),
+                        "distinguished": bool(distinguished),
+                        "edited": bool(edited),
+                        "is_author_submitter": bool(is_submitter),
+                        "post_id": str(post_id),
+                        "link_comment": str(link_comment),
+                        "comment_score": float(score),
+                    }
+                    print(dict_post_preview)
+                    all_comments_list.append(dict_post_preview)
+            except (praw.exceptions.InvalidURL, prawcore.exceptions.NotFound) as e:
+                """
+                Some url posts are images, or gifs or maybe the post was deleted
+                """
+                continue
 
     df_comments_raw = pd.DataFrame(all_comments_list)
     if df_comments_raw.empty:
@@ -116,7 +121,7 @@ def write_to_gcs(local_path: Path, gcs_bucket_path: str) -> None:
     gcs_block.upload_from_path(from_path=local_path, to_path=gcs_bucket_path)
 
 
-@flow()
+@flow(log_prints=True)
 def scrape_reddit_comments():
 
     gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
@@ -129,6 +134,9 @@ def scrape_reddit_comments():
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)
     local_path = write_local(concatenated_df)
+    concatenated_df.drop_duplicates(subset=["body", "created_at", "post_id"], keep="first", inplace=True)
+    # concatenated_df.to_csv("test_comments.csv")
+    print(concatenated_df.shape)
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
 
 

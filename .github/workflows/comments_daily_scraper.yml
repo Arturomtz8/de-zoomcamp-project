@@ -1,12 +1,12 @@
 name: Scrape daily comments from posts
 
-# on:
-#   schedule:
-#     - cron: '0 18 20 * * *'
 on:
-  push:
-    branches:
-      - main
+  schedule:
+    - cron: '30 18 * * *''
+# on:
+#   push:
+#     branches:
+#       - main
 jobs:
   build:
     runs-on: ubuntu-latest
