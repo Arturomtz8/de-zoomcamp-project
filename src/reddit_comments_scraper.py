@@ -27,9 +27,13 @@ def extract_comments(
     df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
 ) -> pd.DataFrame:
     # deleted users or posts have none post_url
-    df_comments_from_bucket.drop_duplicates(subset=["body", "created_at"], keep="first", inplace=True)
+    df_comments_from_bucket.drop_duplicates(
+        subset=["body", "created_at"], keep="first", inplace=True
+    )
     print(df_comments_from_bucket.shape)
-    df_comments_from_bucket = df_comments_from_bucket[df_comments_from_bucket["post_url"].notnull()]
+    df_comments_from_bucket = df_comments_from_bucket[
+        df_comments_from_bucket["post_url"].notnull()
+    ]
     print(df_comments_from_bucket.shape)
     posts_id_from_comments_list_in_gcs = df_comments_from_bucket["post_id"].to_list()
     all_comments_list = list()
@@ -48,11 +52,9 @@ def extract_comments(
             try:
                 submission = reddit.submission(post_id)
                 for top_level_comment in submission.comments:
-                    if (
-                        isinstance(top_level_comment, MoreComments)
-                    ):
+                    if isinstance(top_level_comment, MoreComments):
                         continue
-                    print("new comments found")        
+                    print("new comments found")
                     author = top_level_comment.author
                     comment_id = top_level_comment.id
                     submission_url = top_level_comment.submission.url
@@ -134,7 +136,9 @@ def scrape_reddit_comments():
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)
     local_path = write_local(concatenated_df)
-    concatenated_df.drop_duplicates(subset=["body", "created_at", "post_id"], keep="first", inplace=True)
+    concatenated_df.drop_duplicates(
+        subset=["body", "created_at", "post_id"], keep="first", inplace=True
+    )
     # concatenated_df.to_csv("test_comments.csv")
     print(concatenated_df.shape)
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
