@@ -34,7 +34,7 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
     )
 
     subreddit = reddit.subreddit(subreddit_name)
-    for submission in subreddit.top(time_filter="day", limit=20):
+    for submission in subreddit.top(time_filter="day", limit=50):
         if str(submission.id) not in post_ids_list_in_gcs:
             print("found new posts")
             author = submission.author
