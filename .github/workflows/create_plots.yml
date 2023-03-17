@@ -2,7 +2,7 @@ name: Create plots
 
 on:
   schedule:
-    - cron: '40 18 * * *'
+    - cron: '0 4 * * *'
 # on:
 #   push:
 #     branches:

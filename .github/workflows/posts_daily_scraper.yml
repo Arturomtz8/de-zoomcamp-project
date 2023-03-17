@@ -2,7 +2,7 @@ name: Scrape daily posts from subreddits
 
 on:
   schedule:
-    - cron: '0 6,18 * * *'
+    - cron: '0 9,15,21,3 * * *'
 # on:
 #   push:
 #     branches:

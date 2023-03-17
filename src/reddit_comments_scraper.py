@@ -18,8 +18,6 @@ def convert_bytes_to_df(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df_posts = pd.read_parquet((io.BytesIO(posts_content)))
     df_comments = pd.read_parquet((io.BytesIO(comments_content)))
-    print("comments df shape from bucket")
-    print(df_comments.shape)
     return df_posts, df_comments
 
 
@@ -27,16 +25,8 @@ def convert_bytes_to_df(
 def extract_comments(
     df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
 ) -> pd.DataFrame:
-    # deleted users or posts have none post_url
-    df_comments_from_bucket.drop_duplicates(
-        subset=["body", "created_at"], keep="first", inplace=True
-    )
-    print("comments df shape after deleting duplicates")
-    print(df_comments_from_bucket.shape)
-    df_comments_from_bucket = df_comments_from_bucket[
-        df_comments_from_bucket["post_url"].notnull()
-    ]
-    posts_url_from_comments_list_in_gcs = set(df_comments_from_bucket["post_url"].to_list())
+    # comments_id_from_bucket = set(df_comments_from_bucket["comment_id"].to_list())
+    posts_url_from_bucket = set(df_comments_from_bucket["post_url"].notnull().to_list())
     # print(len(posts_url_from_comments_list_in_gcs))
     # print(len(df_posts_from_bucket["post_url"]))
     all_comments_list = list()
@@ -50,13 +40,16 @@ def extract_comments(
         user_agent=REDDIT_USER_AGENT.get(),
         username=REDDIT_USERNAME.get(),
     )
-    for post_url in df_posts_from_bucket["post_url"]:
-        if post_url not in posts_url_from_comments_list_in_gcs:
+    for post_url in set(df_posts_from_bucket["post_url"].notnull().to_list()):
+        # print(post_url)
+        if post_url not in posts_url_from_bucket:
             try:
                 submission = reddit.submission(url=post_url)
-                # todo filter by body or created at, look which field could be used for hindering duplicates
                 for top_level_comment in submission.comments:
+                    # some posts urls are deleted, so it is not enough to check
+                    # post_url
                     if isinstance(top_level_comment, MoreComments):
+                        print("comment already in dataset or comment with more comments structure")
                         continue
                     print("new comments found")
                     author = top_level_comment.author
@@ -84,7 +77,6 @@ def extract_comments(
                         "link_comment": str(link_comment),
                         "comment_score": float(score),
                     }
-                    print(dict_post_preview)
                     all_comments_list.append(dict_post_preview)
             except (praw.exceptions.InvalidURL, prawcore.exceptions.NotFound) as e:
                 """
@@ -130,7 +122,6 @@ def write_to_gcs(local_path: Path, gcs_bucket_path: str) -> None:
 
 @flow(log_prints=True)
 def scrape_reddit_comments():
-
     gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
     posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
     comments_content = gcs_block.read_path("comments_ghosts_stories.parquet")
@@ -140,10 +131,10 @@ def scrape_reddit_comments():
     df_raw = extract_comments(df_posts_from_bucket, df_comments_from_bucket)
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)
-    local_path = write_local(concatenated_df)
-    concatenated_df.drop_duplicates(keep="first", inplace=True)
+    # keep the last comment 
+    concatenated_df.drop_duplicates(subset=["author", "body", "created_at", "comment_id", "post_id"], keep="last", inplace=True)
     # concatenated_df.to_csv("test_comments.csv")
-    print(concatenated_df.shape)
+    local_path = write_local(concatenated_df)
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
 
 
