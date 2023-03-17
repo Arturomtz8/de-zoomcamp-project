@@ -49,7 +49,9 @@ def extract_comments(
                     # some posts urls are deleted, so it is not enough to check
                     # post_url
                     if isinstance(top_level_comment, MoreComments):
-                        print("comment already in dataset or comment with more comments structure")
+                        print(
+                            "comment already in dataset or comment with more comments structure"
+                        )
                         continue
                     print("new comments found")
                     author = top_level_comment.author
@@ -131,8 +133,12 @@ def scrape_reddit_comments():
     df_raw = extract_comments(df_posts_from_bucket, df_comments_from_bucket)
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)
-    # keep the last comment 
-    concatenated_df.drop_duplicates(subset=["author", "body", "created_at", "comment_id", "post_id"], keep="last", inplace=True)
+    # keep the last comment
+    concatenated_df.drop_duplicates(
+        subset=["author", "body", "created_at", "comment_id", "post_id"],
+        keep="last",
+        inplace=True,
+    )
     # concatenated_df.to_csv("test_comments.csv")
     local_path = write_local(concatenated_df)
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
