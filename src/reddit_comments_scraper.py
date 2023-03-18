@@ -26,7 +26,9 @@ def extract_comments(
     df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
 ) -> pd.DataFrame:
     # comments_id_from_bucket = set(df_comments_from_bucket["comment_id"].to_list())
-    df_comments_from_bucket = df_comments_from_bucket.loc[df_comments_from_bucket["post_url"].notnull()]
+    df_comments_from_bucket = df_comments_from_bucket.loc[
+        df_comments_from_bucket["post_url"].notnull()
+    ]
     posts_url_from_comments = set(df_comments_from_bucket["post_url"].to_list())
     posts_url_from_posts = set(df_posts_from_bucket["post_url"].to_list())
     print(posts_url_from_posts)
