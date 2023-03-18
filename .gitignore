@@ -199,4 +199,4 @@ pyrightconfig.json
 *.tfstate
 *.tfplan
 .terraform
-terraform/
+*.backup
