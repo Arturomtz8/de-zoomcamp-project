@@ -26,7 +26,10 @@ def extract_comments(
     df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
 ) -> pd.DataFrame:
     # comments_id_from_bucket = set(df_comments_from_bucket["comment_id"].to_list())
-    posts_url_from_bucket = set(df_comments_from_bucket["post_url"].notnull().to_list())
+    df_comments_from_bucket = df_comments_from_bucket.loc[df_comments_from_bucket["post_url"].notnull()]
+    posts_url_from_comments = set(df_comments_from_bucket["post_url"].to_list())
+    posts_url_from_posts = set(df_posts_from_bucket["post_url"].to_list())
+    print(posts_url_from_posts)
     # print(len(posts_url_from_comments_list_in_gcs))
     # print(len(df_posts_from_bucket["post_url"]))
     all_comments_list = list()
@@ -40,9 +43,9 @@ def extract_comments(
         user_agent=REDDIT_USER_AGENT.get(),
         username=REDDIT_USERNAME.get(),
     )
-    for post_url in set(df_posts_from_bucket["post_url"].notnull().to_list()):
-        # print(post_url)
-        if post_url not in posts_url_from_bucket:
+    for post_url in posts_url_from_posts:
+        print(post_url)
+        if post_url not in posts_url_from_comments:
             try:
                 submission = reddit.submission(url=post_url)
                 for top_level_comment in submission.comments:
