@@ -1,23 +1,29 @@
-def import_to_big_query(data, context, dataset='UPDATE_DATASET_HERE', table='UPDATE_TABLE_HERE', verbose=True):
+def import_to_big_query(
+    data,
+    context,
+    dataset="UPDATE_DATASET_HERE",
+    table="UPDATE_TABLE_HERE",
+    verbose=True,
+):
     def vprint(s):
         if verbose:
             print(s)
 
-    vprint(f'Event ID: {context.event_id}')
-    vprint(f'Event type: {context.event_type}')
-    vprint('Importing required modules.')
+    vprint(f"Event ID: {context.event_id}")
+    vprint(f"Event type: {context.event_type}")
+    vprint("Importing required modules.")
 
     from google.cloud import bigquery
 
-    vprint(f'This is the data: {data}')
+    vprint(f"This is the data: {data}")
 
-    input_bucket_name = data['bucket']
-    source_file = data['name']
-    uri = f'gs://{input_bucket_name}/{source_file}'
+    input_bucket_name = data["bucket"]
+    source_file = data["name"]
+    uri = f"gs://{input_bucket_name}/{source_file}"
 
     vprint(f'Getting the data from bucket "{uri}"')
-    
-    if str(source_file).lower().endswith('.parquet'):
+
+    if str(source_file).lower().endswith(".parquet"):
 
         client = bigquery.Client()
         dataset_ref = client.dataset(dataset)
@@ -33,17 +39,16 @@ def import_to_big_query(data, context, dataset='UPDATE_DATASET_HERE', table='UPD
         job_config.write_disposition = bigquery.WriteDisposition.WRITE_APPEND
 
         load_job = client.load_table_from_uri(
-            uri,
-            dataset_ref.table(table),
-            job_config=job_config)
+            uri, dataset_ref.table(table), job_config=job_config
+        )
 
-        vprint(F'Starting job {load_job.job_id}')
+        vprint(f"Starting job {load_job.job_id}")
 
         load_job.result()
-        vprint('Job finished.')
+        vprint("Job finished.")
 
         destination_table = client.get_table(dataset_ref.table(table))
-        vprint(F'Loaded {destination_table.num_rows} rows.')
-        vprint('File imported successfully.')
+        vprint(f"Loaded {destination_table.num_rows} rows.")
+        vprint("File imported successfully.")
     else:
-        vprint('Not an importable file.')
+        vprint("Not an importable file.")
