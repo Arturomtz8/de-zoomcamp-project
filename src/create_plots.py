@@ -72,7 +72,7 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
         dpi=150,
     )
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
-    # plt.close()
+    plt.close()
 
 
 @task(log_prints=True)
@@ -95,7 +95,7 @@ def create_wordcloud(img_file_path: Path, column_name: str, stopwords_list=List[
     plt.axis("off")    
     plt.savefig(local_path, bbox_inches="tight")
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
-    # plt.close()
+    plt.close()
 
 
 @flow()
