@@ -2,10 +2,9 @@ from pathlib import Path
 
 import pandas as pd
 import praw
+from gc_funcs.reader_writer import read_posts, write_to_gcs
 from prefect import flow, task
 from prefect.blocks.system import Secret
-
-from gc_funcs.reader_writer import read_posts, write_to_gcs
 
 
 @task(tags="extract reddit posts", log_prints=True)

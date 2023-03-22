@@ -3,11 +3,10 @@ from pathlib import Path
 import pandas as pd
 import praw
 import prawcore
+from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
 from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
-
-from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
 
 
 @task(tags="extract reddit comments", log_prints=True)

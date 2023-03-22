@@ -7,14 +7,13 @@ import matplotlib.pyplot as plt
 import nltk
 import pandas as pd
 import seaborn as sns
+from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
 # Lemmatizer helps to reduce words to the base form
 from nltk.stem import WordNetLemmatizer
 # This allows to create individual objects from a bog of words
 from nltk.tokenize import word_tokenize
 from prefect import flow, task
 from wordcloud import WordCloud
-
-from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
 
 
 @task(log_prints=True)
