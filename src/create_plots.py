@@ -20,10 +20,14 @@ from wordcloud import WordCloud
 def word_freq(
     data_file_path: Path, column_name: str, stopwords_list: List[str]
 ) -> pd.DataFrame:
-    df_posts = pd.read_parquet(f"{data_file_path}/posts_ghosts_stories.parquet")
-    posts_text_string = "".join(df_posts[column_name].tolist())
+    if column_name in ["post_title", "post_text"]:
+        df = pd.read_parquet(f"{data_file_path}/posts_ghosts_stories.parquet")
+    elif column_name == "body":
+        df = pd.read_parquet(f"{data_file_path}/comments_ghosts_stories.parquet")
+
+    column_to_string = "".join(df[column_name].tolist())
     # creates tokens, creates lower class, removes numbers and lemmatizes the words
-    new_tokens = word_tokenize(posts_text_string)
+    new_tokens = word_tokenize(column_to_string)
     new_tokens = [t.lower() for t in new_tokens]
     new_tokens = [t for t in new_tokens if t.isalpha() and len(t) >= 2]
 
@@ -54,8 +58,12 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
     )  # or plt.suptitle('Main title')
     if "words_in_post_title" in list(df.columns):
         sns.barplot(x="frequency", y="words_in_post_title", data=df.head(25))
-    else:
+    elif "words_in_post_text" in list(df.columns):
         sns.barplot(x="frequency", y="words_in_post_text", data=df.head(25))
+    elif "words_in_body" in list(df.columns):
+        # change the name to a more descriptive name
+        df["words_in_comment_body"] = df["words_in_body"]
+        sns.barplot(x="frequency", y="words_in_comment_body", data=df.head(25))
     plt.savefig(
         f"{img_file_path}/{axes.get_ylabel()}.png",
         bbox_inches="tight",
@@ -117,8 +125,11 @@ def create_plots():
         column_name="post_text",
         stopwords_list=stopwords_personalized,
     )
+    df_comments_text = word_freq(data_file_path=raw_data_file_path,
+                                 column_name="body", stopwords_list=stopwords_personalized)
     create_barplot(img_file_path=img_file_path, df=df_post_title)
     create_barplot(img_file_path=img_file_path, df=df_post_text)
+    create_barplot(img_file_path=img_file_path, df=df_comments_text)
     create_wordcloud(
         data_file_path=raw_data_file_path,
         img_file_path=img_file_path,
