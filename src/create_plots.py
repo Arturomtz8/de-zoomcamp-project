@@ -14,16 +14,17 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from prefect import flow, task
 from wordcloud import WordCloud
+from gc_funcs.reader_writer import read_posts, read_comments
 
 
 @task(log_prints=True)
-def word_freq(
-    data_file_path: Path, column_name: str, stopwords_list: List[str]
+def create_word_freq_df(
+   data_file_path: Path, column_name: str, stopwords_list: List[str]
 ) -> pd.DataFrame:
     if column_name in ["post_title", "post_text"]:
-        df = pd.read_parquet(f"{data_file_path}/posts_ghosts_stories.parquet")
+        df = read_posts()
     elif column_name == "body":
-        df = pd.read_parquet(f"{data_file_path}/comments_ghosts_stories.parquet")
+        df = read_comments()
 
     column_to_string = "".join(df[column_name].tolist())
     # creates tokens, creates lower class, removes numbers and lemmatizes the words
@@ -73,15 +74,16 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
 
 
 @task(log_prints=True)
-def create_wordcloud(data_file_path: Path, img_file_path: Path, column_name: str):
-    df_posts: pd.DataFrame = pd.read_parquet(
-        f"{data_file_path}/posts_ghosts_stories.parquet"
-    )
-    posts_text_string: str = "".join(df_posts[column_name].to_list())
+def create_wordcloud(img_file_path: Path, column_name: str):
+    if column_name in ["post_title", "post_text"]:
+        df = read_posts()
+    elif column_name == "body":
+        df = read_comments()
+    column_to_string: str = "".join(df[column_name].to_list())
 
     wordcloud = WordCloud(
         colormap="ocean", background_color="gold", min_font_size=10
-    ).generate(posts_text_string)
+    ).generate(column_to_string)
     # Display the generated image:
     # the matplotlib way:
     plt.imshow(wordcloud, interpolation="bilinear")
@@ -115,30 +117,32 @@ def create_plots():
         "ha",
     ]
     stopwords_personalized.extend(new_stopwords)
-    df_post_title = word_freq(
+    df_post_title = create_word_freq_df(
         data_file_path=raw_data_file_path,
         column_name="post_title",
         stopwords_list=stopwords_personalized,
     )
-    df_post_text = word_freq(
+    df_post_text = create_word_freq_df(
         data_file_path=raw_data_file_path,
         column_name="post_text",
         stopwords_list=stopwords_personalized,
     )
-    df_comments_text = word_freq(data_file_path=raw_data_file_path,
+    df_comments_text = create_word_freq_df(data_file_path=raw_data_file_path,
                                  column_name="body", stopwords_list=stopwords_personalized)
     create_barplot(img_file_path=img_file_path, df=df_post_title)
     create_barplot(img_file_path=img_file_path, df=df_post_text)
     create_barplot(img_file_path=img_file_path, df=df_comments_text)
     create_wordcloud(
-        data_file_path=raw_data_file_path,
         img_file_path=img_file_path,
         column_name="post_title",
     )
     create_wordcloud(
-        data_file_path=raw_data_file_path,
         img_file_path=img_file_path,
         column_name="post_text",
+    )
+    create_wordcloud(
+        img_file_path=img_file_path,
+        column_name="body",
     )
 
 
