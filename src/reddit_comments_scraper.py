@@ -6,7 +6,8 @@ import prawcore
 from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from gc_funcs.reader_writer import read_posts, read_comments, write_to_gcs
+
+from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
 
 
 @task(tags="extract reddit comments", log_prints=True)
@@ -107,7 +108,6 @@ def write_local_and_to_gcs(df: pd.DataFrame) -> None:
     local_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(local_path, compression="gzip")
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
-
 
 
 @flow(log_prints=True)

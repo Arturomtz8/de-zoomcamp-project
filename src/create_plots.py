@@ -13,12 +13,13 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from prefect import flow, task
 from wordcloud import WordCloud
-from gc_funcs.reader_writer import read_posts, read_comments, write_to_gcs
+
+from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
 
 
 @task(log_prints=True)
 def create_word_freq_df(
-   data_file_path: Path, column_name: str, stopwords_list: List[str]
+    data_file_path: Path, column_name: str, stopwords_list: List[str]
 ) -> pd.DataFrame:
     if column_name in ["post_title", "post_text"]:
         df = read_posts()
@@ -64,7 +65,7 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
         # change the name to a more descriptive name
         df["words_in_comment_body"] = df["words_in_body"]
         sns.barplot(x="frequency", y="words_in_comment_body", data=df.head(25))
-    
+
     local_path = Path(f"{img_file_path}/{axes.get_ylabel()}.png")
     plt.savefig(
         local_path,
@@ -76,23 +77,28 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
 
 
 @task(log_prints=True)
-def create_wordcloud(img_file_path: Path, column_name: str, stopwords_list=List[str])->Path:
+def create_wordcloud(
+    img_file_path: Path, column_name: str, stopwords_list=List[str]
+) -> Path:
     if column_name in ["post_title", "post_text"]:
         df = read_posts()
         local_path = Path(f"{img_file_path}/wordcloud_{column_name}.png")
     elif column_name == "body":
         df = read_comments()
         local_path = Path(f"{img_file_path}/wordcloud_comment_{column_name}.png")
-    
+
     column_to_string: str = "".join(df[column_name].to_list())
 
     wordcloud = WordCloud(
-        colormap="ocean", background_color="gold", min_font_size=10, stopwords=stopwords_list
+        colormap="ocean",
+        background_color="gold",
+        min_font_size=10,
+        stopwords=stopwords_list,
     ).generate(column_to_string)
     # Display the generated image:
     # the matplotlib way:
     plt.imshow(wordcloud, interpolation="bilinear")
-    plt.axis("off")    
+    plt.axis("off")
     plt.savefig(local_path, bbox_inches="tight")
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
     plt.close()
@@ -133,25 +139,28 @@ def create_plots():
         column_name="post_text",
         stopwords_list=stopwords_personalized,
     )
-    df_comments_text = create_word_freq_df(data_file_path=raw_data_file_path,
-                                 column_name="body", stopwords_list=stopwords_personalized)
+    df_comments_text = create_word_freq_df(
+        data_file_path=raw_data_file_path,
+        column_name="body",
+        stopwords_list=stopwords_personalized,
+    )
     create_barplot(img_file_path=img_file_path, df=df_post_title)
     create_barplot(img_file_path=img_file_path, df=df_post_text)
     create_barplot(img_file_path=img_file_path, df=df_comments_text)
     create_wordcloud(
         img_file_path=img_file_path,
         column_name="post_title",
-        stopwords_list=stopwords_personalized
+        stopwords_list=stopwords_personalized,
     )
     create_wordcloud(
         img_file_path=img_file_path,
         column_name="post_text",
-        stopwords_list=stopwords_personalized
+        stopwords_list=stopwords_personalized,
     )
     create_wordcloud(
         img_file_path=img_file_path,
         column_name="body",
-        stopwords_list=stopwords_personalized
+        stopwords_list=stopwords_personalized,
     )
 
 
