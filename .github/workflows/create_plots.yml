@@ -37,7 +37,7 @@ jobs:
         poetry run prefect cloud workspace set --workspace "${{secrets.PREFECT_WORKSPACE}}"
     - name: Run python script
       run: |
-        poetry run python src/create_plots.py
+        poetry run python src/flows/create_plots.py
     - name: Add & Commit
       # if: always()
       uses: EndBug/add-and-commit@v9.1.1
