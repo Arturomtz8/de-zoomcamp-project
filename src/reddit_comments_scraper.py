@@ -1,6 +1,4 @@
-import io
 from pathlib import Path
-from typing import List, Tuple
 
 import pandas as pd
 import praw
@@ -8,17 +6,7 @@ import prawcore
 from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from prefect.filesystems import GCS
-from prefect_gcp.cloud_storage import GcsBucket
-
-
-@task(log_prints=True)
-def convert_bytes_to_df(
-    posts_content: bytes, comments_content: bytes
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    df_posts = pd.read_parquet((io.BytesIO(posts_content)))
-    df_comments = pd.read_parquet((io.BytesIO(comments_content)))
-    return df_posts, df_comments
+from gc_funcs.reader_writer import read_posts, read_comments, write_to_gcs
 
 
 @task(tags="extract reddit comments", log_prints=True)
@@ -114,27 +102,18 @@ def concat_df(
 
 
 @task(log_prints=True)
-def write_local(df: pd.DataFrame) -> Path:
+def write_local_and_to_gcs(df: pd.DataFrame) -> None:
     local_path = Path(f"data/ghost_stories/comments_ghosts_stories.parquet")
     local_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(local_path, compression="gzip")
-    return local_path
+    write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
 
-
-@task(log_prints=True)
-def write_to_gcs(local_path: Path, gcs_bucket_path: str) -> None:
-    gcs_block = GcsBucket.load("bucket-zoomcamp")
-    gcs_block.upload_from_path(from_path=local_path, to_path=gcs_bucket_path)
 
 
 @flow(log_prints=True)
 def scrape_reddit_comments():
-    gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
-    posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
-    comments_content = gcs_block.read_path("comments_ghosts_stories.parquet")
-    df_posts_from_bucket, df_comments_from_bucket = convert_bytes_to_df(
-        posts_content, comments_content
-    )
+    df_posts_from_bucket = read_posts()
+    df_comments_from_bucket = read_comments()
     df_raw = extract_comments(df_posts_from_bucket, df_comments_from_bucket)
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)
@@ -145,8 +124,7 @@ def scrape_reddit_comments():
         inplace=True,
     )
     # concatenated_df.to_csv("test_comments.csv")
-    local_path = write_local(concatenated_df)
-    write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
+    write_local_and_to_gcs(concatenated_df)
 
 
 if __name__ == "__main__":

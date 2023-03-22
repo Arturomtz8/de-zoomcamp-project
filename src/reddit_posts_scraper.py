@@ -1,21 +1,10 @@
-import io
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 import praw
 from prefect import flow, task
 from prefect.blocks.system import Secret
-from prefect.filesystems import GCS
-from prefect_gcp.cloud_storage import GcsBucket
-
-
-@task(log_prints=True)
-def convert_bytes_to_df(posts_content: bytes) -> pd.DataFrame:
-    df_posts = pd.read_parquet((io.BytesIO(posts_content)))
-
-    print(df_posts.shape)
-    return df_posts
+from gc_funcs.reader_writer import read_posts, write_to_gcs
 
 
 @task(tags="extract reddit posts", log_prints=True)
@@ -130,32 +119,23 @@ def concat_df(new_df: pd.DataFrame, df_posts_from_bucket: pd.DataFrame) -> pd.Da
 
 
 @task(log_prints=True)
-def write_local(df: pd.DataFrame) -> Path:
+def write_local_and_to_gcs(df: pd.DataFrame) -> None:
     local_path = Path(f"data/ghost_stories/posts_ghosts_stories.parquet")
     local_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(local_path, compression="gzip")
-    return local_path
-
-
-@task(log_prints=True)
-def write_to_gcs(local_path: Path, gcs_bucket_path: str) -> None:
-    gcs_block = GcsBucket.load("bucket-zoomcamp")
-    gcs_block.upload_from_path(from_path=local_path, to_path=gcs_bucket_path)
+    write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
 
 
 @flow()
 def scrape_reddit():
-    gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
-    posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
-    df_posts_from_bucket = convert_bytes_to_df(posts_content)
+    df_posts_from_bucket = read_posts()
     df_raw = extract_posts(
         subreddit_name="Ghoststories+Ghosts+Paranormal+ParanormalEncounters",
         df_from_bucket=df_posts_from_bucket,
     )
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_posts_from_bucket)
-    local_path = write_local(concatenated_df)
-    write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
+    write_local_and_to_gcs(concatenated_df)
 
 
 if __name__ == "__main__":
