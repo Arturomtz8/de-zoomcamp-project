@@ -60,7 +60,7 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
                 "post_fullname": str(name),
                 "post_title": str(title),
                 "post_text": str(text),
-                "num_comments": int(num_comments),
+                "num_comments": str(num_comments),
                 "post_score": float(score),
                 "post_url": str(url),
                 "saved": bool(saved),
