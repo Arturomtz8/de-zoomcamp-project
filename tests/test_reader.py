@@ -2,12 +2,12 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, (os.path.join(os.path.dirname(__file__), ".."))) 
-
-from src.flows.gc_funcs.reader_writer import read_posts, read_comments, write_to_gcs
+sys.path.insert(0, (os.path.join(os.path.dirname(__file__), "..")))
 
 import sys
 
+from src.flows.gc_funcs.reader_writer import (read_comments, read_posts,
+                                              write_to_gcs)
 
 df_posts = read_posts()
 # df_test_comments = read_comments()
