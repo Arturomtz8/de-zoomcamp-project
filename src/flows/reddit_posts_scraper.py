@@ -42,27 +42,11 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
             url = submission.url
             saved = submission.saved
             created_at = submission.created_utc
-            num_comments = submission.num_comments
+            # num_comments = submission.num_comments
             over_18 = submission.over_18
             spoiler = submission.spoiler
             stickied = submission.stickied
             upvote_ratio = submission.upvote_ratio
-            dict_poll_data = dict()
-            try:
-                poll_data = submission.poll_data
-                poll_total_vote_count = poll_data.total_vote_count
-                poll_voting_end_timestamp = poll_data.voting_end_timestamp
-                for option in poll_data.options:
-                    dict_poll_data[f"poll_option_{option.text}"] = int(
-                        option.vote_count
-                    )
-                dict_poll_data["total_vote_count"] = int(poll_total_vote_count)
-                dict_poll_data["voting_end_timestamp"] = float(
-                    poll_voting_end_timestamp
-                )
-                print(dict_poll_data)
-            except AttributeError:
-                pass
 
             dict_post_preview = {
                 "author": str(author),
@@ -81,14 +65,12 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
                 "post_url": str(url),
                 "saved": bool(saved),
                 "created_at": float(created_at),
-                "num_comments": str(num_comments),
+                # "num_comments": str(num_comments),
                 "over_18": bool(over_18),
                 "spoiler": bool(spoiler),
                 "stickied": bool(stickied),
                 "upvote_ratio": float(upvote_ratio),
             }
-            if dict_poll_data:
-                dict_post_preview.update(dict_poll_data)
 
             all_posts_list.append(dict_post_preview)
 

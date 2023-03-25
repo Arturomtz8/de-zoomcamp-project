@@ -53,12 +53,12 @@ resource "google_bigquery_dataset" "reddit_dataset" {
   location   = var.region
 }
 
-# create table for posts
+
 resource "google_bigquery_table" "raw_posts" {
   dataset_id          = google_bigquery_dataset.reddit_dataset.dataset_id
   table_id            = "raw_posts_ghosts"
   description         = "Ghosts and paranormal raw posts from reddit"
-  deletion_protection = true
+  deletion_protection = false
 
   external_data_configuration {
     autodetect            = true
@@ -73,12 +73,11 @@ resource "google_bigquery_table" "raw_posts" {
 }
 
 
-# create table for comments
 resource "google_bigquery_table" "raw_comments" {
   dataset_id          = google_bigquery_dataset.reddit_dataset.dataset_id
   table_id            = "raw_comments_ghosts"
   description         = "Ghosts and paranormal raw comments from reddit"
-  deletion_protection = true
+  deletion_protection = false
 
   external_data_configuration {
     autodetect            = true
@@ -92,41 +91,3 @@ resource "google_bigquery_table" "raw_comments" {
   }
 }
 
-
-# resource "google_storage_bucket_object" "archive" {
-#   name   = "src_code.zip"
-#   bucket = google_storage_bucket.bucket.name
-#   source = "./data/ghost_stories/"
-# }
-# resource "google_cloudfunctions_function" "function" {
-#   name        = "function-test"
-#   description = "function for updating bq automatically when a new file is uploaded"
-#   runtime     = "python39"
-#   region   = var.region
-
-#   available_memory_mb          = 128
-#   source_archive_bucket        = google_storage_bucket.bucket.name
-#   source_archive_object        = google_storage_bucket_object.archive.name
-#   trigger_http                 = true
-#   https_trigger_security_level = "SECURE_ALWAYS"
-#   timeout                      = 60
-#   entry_point                  = "import_to_big_query"
-#   labels = {
-#     my-label = "cloud-function-bq"
-#   }
-
-#   environment_variables = {
-#     dataset="reddit_data",
-#     table="posts_ghosts",
-#   }
-# }
-
-# # IAM entry for a single user to invoke the function
-# resource "google_cloudfunctions_function_iam_member" "invoker" {
-#   project        = google_cloudfunctions_function.function.project
-#   region         = google_cloudfunctions_function.function.region
-#   cloud_function = google_cloudfunctions_function.function.name
-
-#   role   = "roles/cloudfunctions.invoker"
-#   member = "user:myFunctionInvoker@example.com"
-# }
