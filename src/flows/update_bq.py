@@ -23,7 +23,7 @@ def write_bq(df_from_gcs: pd.DataFrame) -> None:
 @flow()
 def update_posts_and_comments_in_bq():
     df_posts_from_gcs = read_posts()
-    write_bq(df_posts_from_gcs) 
+    write_bq(df_posts_from_gcs)
 
 
 if __name__ == "__main__":
