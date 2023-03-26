@@ -6,22 +6,25 @@ from prefect_gcp import GcpCredentials
 
 
 @task(log_prints=True)
-def write_bq(bq_table: str, df: pd.DataFrame, color: str) -> None:
-    """Write DataFrame to BiqQuery"""
-
-    gcp_credentials = GcpCredentials.load("gcp-credentials-zoomcamp")
+def write_bq(df_from_gcs: pd.DataFrame) -> None:
+    bq_table = "reddit_data.raw_posts_ghosts"
     google_project_id = Secret.load("google-project-id")
+    gcp_credentials = GcpCredentials.load("gcp-credentials-zoomcamp")
 
-    df.to_gbq(
+    df_from_gcs.to_gbq(
         destination_table=bq_table,
         project_id=google_project_id.get(),
         credentials=gcp_credentials.get_credentials_from_service_account(),
         if_exists="replace",
     )
+    print("successfully uploaded")
 
 
 @flow()
-def main():
-    df_comments_from_bucket = read_comments()
-    df_posts_from_bucket = read_posts()
-    write_bq()
+def update_posts_and_comments_in_bq():
+    df_posts_from_gcs = read_posts()
+    write_bq(df_posts_from_gcs) 
+
+
+if __name__ == "__main__":
+    update_posts_and_comments_in_bq()

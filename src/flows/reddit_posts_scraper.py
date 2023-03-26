@@ -42,7 +42,6 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
             url = submission.url
             saved = submission.saved
             created_at = submission.created_utc
-            # num_comments = submission.num_comments
             over_18 = submission.over_18
             spoiler = submission.spoiler
             stickied = submission.stickied
@@ -65,7 +64,6 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
                 "post_url": str(url),
                 "saved": bool(saved),
                 "created_at": float(created_at),
-                # "num_comments": str(num_comments),
                 "over_18": bool(over_18),
                 "spoiler": bool(spoiler),
                 "stickied": bool(stickied),
