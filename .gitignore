@@ -200,3 +200,5 @@ pyrightconfig.json
 *.tfplan
 .terraform
 *.backup
+
+.vscode/settings.jso

@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 import praw
-from gc_funcs.reader_writer import read_posts, write_to_gcs
+from gc_funcs.reader_writer import get_posts_from_gcs, write_to_gcs
 from prefect import flow, task
 from prefect.blocks.system import Secret
 
@@ -108,7 +108,7 @@ def write_local_and_to_gcs(df: pd.DataFrame) -> None:
 
 @flow()
 def scrape_reddit():
-    df_posts_from_bucket = read_posts()
+    df_posts_from_bucket = get_posts_from_gcs()
     df_raw = extract_posts(
         subreddit_name="Ghoststories+Ghosts+Paranormal+ParanormalEncounters",
         df_from_bucket=df_posts_from_bucket,

@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import nltk
 import pandas as pd
 import seaborn as sns
-from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
+from gc_funcs.reader_writer import (get_comments_from_gcs, get_posts_from_gcs,
+                                    write_to_gcs)
 # Lemmatizer helps to reduce words to the base form
 from nltk.stem import WordNetLemmatizer
 # This allows to create individual objects from a bog of words
@@ -21,9 +22,9 @@ def create_word_freq_df(
     data_file_path: Path, column_name: str, stopwords_list: List[str]
 ) -> pd.DataFrame:
     if column_name in ["post_title", "post_text"]:
-        df = read_posts()
+        df = get_posts_from_gcs()
     elif column_name == "body":
-        df = read_comments()
+        df = get_comments_from_gcs()
 
     column_to_string = "".join(df[column_name].tolist())
     # creates tokens, creates lower class, removes numbers and lemmatizes the words
@@ -80,10 +81,10 @@ def create_wordcloud(
     img_file_path: Path, column_name: str, stopwords_list=List[str]
 ) -> Path:
     if column_name in ["post_title", "post_text"]:
-        df = read_posts()
+        df = get_posts_from_gcs()
         local_path = Path(f"{img_file_path}/wordcloud_{column_name}.png")
     elif column_name == "body":
-        df = read_comments()
+        df = get_comments_from_gcs()
         local_path = Path(f"{img_file_path}/wordcloud_comment_{column_name}.png")
 
     column_to_string: str = "".join(df[column_name].to_list())

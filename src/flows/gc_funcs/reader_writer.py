@@ -9,7 +9,7 @@ from prefect_gcp.cloud_storage import GcsBucket
 gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
 
 
-def read_posts() -> pd.DataFrame:
+def get_posts_from_gcs() -> pd.DataFrame:
     """
     Read parquet posts from google cloud storage and return df
     """
@@ -18,7 +18,7 @@ def read_posts() -> pd.DataFrame:
     return df
 
 
-def read_comments() -> pd.DataFrame:
+def get_comments_from_gcs() -> pd.DataFrame:
     """
     Read parquet comments from google cloud storage and return df
     """

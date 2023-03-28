@@ -3,7 +3,8 @@ from pathlib import Path
 import pandas as pd
 import praw
 import prawcore
-from gc_funcs.reader_writer import read_comments, read_posts, write_to_gcs
+from gc_funcs.reader_writer import (get_comments_from_gcs, get_posts_from_gcs,
+                                    write_to_gcs)
 from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
@@ -111,8 +112,8 @@ def write_local_and_to_gcs(df: pd.DataFrame) -> None:
 
 @flow(log_prints=True)
 def scrape_reddit_comments():
-    df_posts_from_bucket = read_posts()
-    df_comments_from_bucket = read_comments()
+    df_posts_from_bucket = get_posts_from_gcs()
+    df_comments_from_bucket = get_comments_from_gcs()
     df_raw = extract_comments(df_posts_from_bucket, df_comments_from_bucket)
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_comments_from_bucket)

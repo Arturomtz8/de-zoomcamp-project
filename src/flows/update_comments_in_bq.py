@@ -1,13 +1,15 @@
 import pandas as pd
-from gc_funcs.reader_writer import read_comments, read_posts
+from gc_funcs.reader_writer import get_comments_from_gcs
 from prefect import flow, task
 from prefect.blocks.system import Secret
 from prefect_gcp import GcpCredentials
 
 
 @task(log_prints=True)
-def write_bq(df_from_gcs: pd.DataFrame) -> None:
-    bq_table = "reddit_data.raw_posts_ghosts"
+def write_bq(
+    bq_table: str,
+    df_from_gcs: pd.DataFrame,
+) -> None:
     google_project_id = Secret.load("google-project-id")
     gcp_credentials = GcpCredentials.load("gcp-credentials-zoomcamp")
 
@@ -21,10 +23,10 @@ def write_bq(df_from_gcs: pd.DataFrame) -> None:
 
 
 @flow()
-def update_posts_and_comments_in_bq():
-    df_posts_from_gcs = read_posts()
-    write_bq(df_posts_from_gcs)
+def update_comments_table_in_bq():
+    df_comments_from_gcs = get_comments_from_gcs()
+    write_bq("reddit_data.raw_comments_ghosts", df_comments_from_gcs)
 
 
 if __name__ == "__main__":
-    update_posts_and_comments_in_bq()
+    update_comments_table_in_bq()

@@ -55,9 +55,9 @@ resource "google_bigquery_dataset" "reddit_dataset" {
 
 
 resource "google_bigquery_table" "raw_posts" {
-  dataset_id = google_bigquery_dataset.reddit_dataset.dataset_id
-  table_id   = "raw_posts_ghosts"
-  description =  "Ghosts and paranormal raw posts from reddit"
+  dataset_id          = google_bigquery_dataset.reddit_dataset.dataset_id
+  table_id            = "raw_posts_ghosts"
+  description         = "Ghosts and paranormal raw posts from reddit"
   deletion_protection = false
 
 
@@ -188,6 +188,84 @@ EOF
 
 }
 
+resource "google_bigquery_table" "raw_comments" {
+  dataset_id          = google_bigquery_dataset.reddit_dataset.dataset_id
+  table_id            = "raw_comments_ghosts"
+  description         = "Ghosts and paranormal raw comments from posts reddit"
+  deletion_protection = false
+
+  schema = <<EOF
+[
+  {
+    "name": "post_url",
+    "type": "STRING",
+    "mode": "NULLABLE",
+    "description": "url of the post the comment belongs to"
+  },
+  {
+    "name": "author",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "author of the comment"
+  },
+  {
+    "name": "comment_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "unique comment id"
+  },
+  {
+    "name": "body",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "the body of the comment"
+  },
+  {
+    "name": "created_at",
+    "type": "TIMESTAMP",
+    "mode": "REQUIRED",
+    "description": "the timestamp the comment was created"
+  },
+  {
+    "name": "distinguished",
+    "type": "BOOL",
+    "mode": "REQUIRED",
+    "description": "if the comment is distinguished"
+  },
+  {
+    "name": "edited",
+    "type": "BOOL",
+    "mode": "REQUIRED",
+    "description": "if the comment is edited"
+  },
+  {
+    "name": "is_author_submitter",
+    "type": "BOOL",
+    "mode": "REQUIRED",
+    "description": "if the author of the post is the submitter of the comment"
+  },
+  {
+    "name": "post_id",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "post id the comment belongs to"
+  },
+  {
+    "name": "link_comment",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "the link to the comment without the domain: https://www.reddit.com/"
+  },
+  {
+    "name": "comment_score",
+    "type": "FLOAT64",
+    "mode": "REQUIRED",
+    "description": "the score of the comment"
+  }
+]
+EOF
+
+}
 
 
 

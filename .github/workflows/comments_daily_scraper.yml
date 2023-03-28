@@ -26,9 +26,12 @@ jobs:
       run: |
         poetry run prefect config set PREFECT_API_KEY=${{secrets.PREFECT_API_KEY}} 
         poetry run prefect cloud workspace set --workspace "${{secrets.PREFECT_WORKSPACE}}"
-    - name: Run python script
+    - name: Run comments scraper
       run: |
         poetry run python src/flows/reddit_comments_scraper.py
+    - name: Run update of comments' table in big query
+      run: |
+        poetry run python src/flows/update_comments_in_bq.py
     - name: Add & Commit
       if: always()
       uses: EndBug/add-and-commit@v9.1.1
