@@ -1,3 +1,4 @@
+import random
 from collections import Counter
 from pathlib import Path
 from typing import List
@@ -15,11 +16,11 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from prefect import flow, task
 from wordcloud import WordCloud
-import random
 
 
-def grey_color_func(word, font_size, position, orientation, random_state=None,
-                    **kwargs):
+def grey_color_func(
+    word, font_size, position, orientation, random_state=None, **kwargs
+):
     return "hsl(0, 0%%, %d%%)" % random.randint(60, 100)
 
 
@@ -64,13 +65,22 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
         "Data taken from subreddits: Ghoststories, Ghosts, Paranormal and ParanormalEncounters"
     )  # or plt.suptitle('Main title')
     if "words_in_post_title" in list(df.columns):
-        sns.barplot(x="frequency", y="words_in_post_title", data=df.head(25), palette = "Blues_d")
+        sns.barplot(
+            x="frequency", y="words_in_post_title", data=df.head(25), palette="Blues_d"
+        )
     elif "words_in_post_text" in list(df.columns):
-        sns.barplot(x="frequency", y="words_in_post_text", data=df.head(25), palette = "Blues_d")
+        sns.barplot(
+            x="frequency", y="words_in_post_text", data=df.head(25), palette="Blues_d"
+        )
     elif "words_in_body" in list(df.columns):
         # change the name to a more descriptive name
         df["words_in_comment_body"] = df["words_in_body"]
-        sns.barplot(x="frequency", y="words_in_comment_body", data=df.head(25), palette = "Blues_d")
+        sns.barplot(
+            x="frequency",
+            y="words_in_comment_body",
+            data=df.head(25),
+            palette="Blues_d",
+        )
 
     local_path = Path(f"{img_file_path}/{axes.get_ylabel()}.png")
     plt.savefig(
@@ -97,8 +107,8 @@ def create_wordcloud(
 
     wordcloud = WordCloud(
         colormap="ocean",
-        background_color='black', 
-        mode='RGBA',
+        background_color="black",
+        mode="RGBA",
         color_func=grey_color_func,
         min_font_size=10,
         stopwords=stopwords_list,
@@ -108,7 +118,7 @@ def create_wordcloud(
     plt.imshow(wordcloud, interpolation="bilinear")
     # plt.tight_layout(pad=0)
     plt.axis("off")
-    plt.savefig(local_path, transparent = True, bbox_inches = 'tight', pad_inches = 0)
+    plt.savefig(local_path, transparent=True, bbox_inches="tight", pad_inches=0)
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
     plt.close()
 
