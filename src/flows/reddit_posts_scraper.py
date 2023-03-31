@@ -11,6 +11,7 @@ from prefect.blocks.system import Secret
 def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataFrame:
     all_posts_list = list()
     post_ids_list_in_gcs = df_from_bucket["post_id"].tolist()
+    post_urls_list_in_gcs = df_from_bucket["post_url"].tolist()
     REDDIT_CLIENT_ID = Secret.load("reddit-client-id")
     REDDIT_CLIENT_SECRET = Secret.load("reddit-client-secret")
     REDDIT_USER_AGENT = Secret.load("reddit-user-agent")
@@ -24,7 +25,8 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
 
     subreddit = reddit.subreddit(subreddit_name)
     for submission in subreddit.top(time_filter="day", limit=50):
-        if str(submission.id) not in post_ids_list_in_gcs:
+        # id is not enough, also must take into account post_url
+        if str(submission.id) not in post_ids_list_in_gcs or str(submission.url) not in post_urls_list_in_gcs:
             print("found new posts")
             author = submission.author
             author_flair_text = submission.author_flair_text
