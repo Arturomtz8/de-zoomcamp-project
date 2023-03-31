@@ -40,7 +40,10 @@ def extract_comments(
                 for top_level_comment in submission.comments:
                     # some posts urls are deleted, so it is not enough to check
                     # post_url
-                    if isinstance(top_level_comment, MoreComments) or top_level_comment.id in comment_id_from_comments:
+                    if (
+                        isinstance(top_level_comment, MoreComments)
+                        or top_level_comment.id in comment_id_from_comments
+                    ):
                         print(
                             "comment already in dataset or comment with more comments structure"
                         )

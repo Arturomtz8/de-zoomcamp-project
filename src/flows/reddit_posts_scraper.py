@@ -26,7 +26,10 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
     subreddit = reddit.subreddit(subreddit_name)
     for submission in subreddit.top(time_filter="day", limit=50):
         # id is not enough, also must take into account post_url
-        if str(submission.id) not in post_ids_list_in_gcs or str(submission.url) not in post_urls_list_in_gcs:
+        if (
+            str(submission.id) not in post_ids_list_in_gcs
+            or str(submission.url) not in post_urls_list_in_gcs
+        ):
             print("found new posts")
             author = submission.author
             author_flair_text = submission.author_flair_text
