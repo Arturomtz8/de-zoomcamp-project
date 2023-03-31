@@ -201,4 +201,5 @@ pyrightconfig.json
 .terraform
 *.backup
 
-.vscode/settings.jso
+.vscode/settings.json
+dbt_reddit/

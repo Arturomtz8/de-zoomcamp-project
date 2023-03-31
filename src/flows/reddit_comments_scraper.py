@@ -14,13 +14,12 @@ from prefect.blocks.system import Secret
 def extract_comments(
     df_posts_from_bucket: pd.DataFrame, df_comments_from_bucket: pd.DataFrame
 ) -> pd.DataFrame:
-    # comments_id_from_bucket = set(df_comments_from_bucket["comment_id"].to_list())
+    comment_id_from_comments = set(df_comments_from_bucket["comment_id"].to_list())
     df_comments_from_bucket = df_comments_from_bucket.loc[
         df_comments_from_bucket["post_url"].notnull()
     ]
     posts_url_from_comments = set(df_comments_from_bucket["post_url"].to_list())
     posts_url_from_posts = set(df_posts_from_bucket["post_url"].to_list())
-    print(posts_url_from_posts)
     # print(len(posts_url_from_comments_list_in_gcs))
     # print(len(df_posts_from_bucket["post_url"]))
     all_comments_list = list()
@@ -35,14 +34,13 @@ def extract_comments(
         username=REDDIT_USERNAME.get(),
     )
     for post_url in posts_url_from_posts:
-        print(post_url)
         if post_url not in posts_url_from_comments:
             try:
                 submission = reddit.submission(url=post_url)
                 for top_level_comment in submission.comments:
                     # some posts urls are deleted, so it is not enough to check
                     # post_url
-                    if isinstance(top_level_comment, MoreComments):
+                    if isinstance(top_level_comment, MoreComments) or top_level_comment.id in comment_id_from_comments:
                         print(
                             "comment already in dataset or comment with more comments structure"
                         )
@@ -83,7 +81,6 @@ def extract_comments(
 
     df_comments_raw = pd.DataFrame(all_comments_list)
     if df_comments_raw.empty:
-        print("no new data available")
         raise Exception("no new data available")
     return df_comments_raw
 
@@ -123,7 +120,6 @@ def scrape_reddit_comments():
         keep="last",
         inplace=True,
     )
-    # concatenated_df.to_csv("test_comments.csv")
     write_local_and_to_gcs(concatenated_df)
 
 

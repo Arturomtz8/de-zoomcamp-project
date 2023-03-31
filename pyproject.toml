@@ -20,6 +20,8 @@ matplotlib = "^3.7.1"
 seaborn = "^0.12.2"
 wordcloud = "^1.8.2"
 gcsfs = "^2023.3.0"
+dbt-bigquery = "^1.4.3"
+shandy-sqlfmt = "^0.17.0"
 
 
 
