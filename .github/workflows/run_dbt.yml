@@ -34,8 +34,8 @@ jobs:
         DBT_ENV_SECRET_token_uri: ${{ secrets.DBT_ENV_SECRET_token_uri }}
         DBT_ENV_SECRET_auth_provider_x509_cert_url: ${{ secrets.DBT_ENV_SECRET_auth_provider_x509_cert_url }}
         DBT_ENV_SECRET_client_x509_cert_url: ${{ secrets.DBT_ENV_SECRET_client_x509_cert_url }}
-        run: poetry run dbt test
-        working-directory: ./dbt_reddit
+      run: poetry run dbt test
+      working-directory: ./dbt_reddit
 
    
 
