@@ -18,3 +18,4 @@ dbt_reddit:
         token_uri: "{{ env_var('DBT_ENV_SECRET_token_uri') }}"
         auth_provider_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_auth_provider_x509_cert_url') }}"
         client_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_client_x509_cert_url') }}"
+
