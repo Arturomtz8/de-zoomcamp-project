@@ -1,0 +1,14 @@
+
+version: 2
+
+sources:
+    - name: raw
+      #For bigquery:
+      database: de-zoomcamp-355322
+      schema: reddit_data
+
+      tables:
+        - name: posts_ghosts
+          identifier : raw_posts_ghosts
+        - name: comments_ghosts
+          identifier : raw_comments_ghosts  

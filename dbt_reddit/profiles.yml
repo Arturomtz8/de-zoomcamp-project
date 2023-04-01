@@ -1,0 +1,20 @@
+dbt_reddit:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      dataset: reddit_data
+      method: service-account-json
+      project: "{{ env_var('DBT_ENV_SECRET_project_id') }}"
+      threads: 4
+      keyfile_json:
+        type: service_account
+        project_id: "{{ env_var('DBT_ENV_SECRET_project_id') }}"
+        private_key_id: "{{ env_var('DBT_ENV_SECRET_private_key_id') }}"
+        private_key: "{{ env_var('DBT_ENV_SECRET_private_key') }}"
+        client_email: "{{ env_var('DBT_ENV_SECRET_client_email') }}"
+        client_id: "{{ env_var('DBT_ENV_SECRET_client_id') }}"
+        auth_uri: "{{ env_var('DBT_ENV_SECRET_auth_uri') }}"
+        token_uri: "{{ env_var('DBT_ENV_SECRET_token_uri') }}"
+        auth_provider_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_auth_provider_x509_cert_url') }}"
+        client_x509_cert_url: "{{ env_var('DBT_ENV_SECRET_client_x509_cert_url') }}"

@@ -202,4 +202,3 @@ pyrightconfig.json
 *.backup
 
 .vscode/settings.json
-dbt_reddit/
