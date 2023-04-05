@@ -9,7 +9,7 @@ on:
       - main
 
 env:
-  DBT_PROFILES_DIR: ./dbt_reddit
+  # DBT_PROFILES_DIR: ./dbt_reddit
   DBT_GOOGLE_PROJECT: ${{ secrets.DBT_ENV_SECRET_project_id }}
   DBT_GOOGLE_DATASET: ${{ secrets.DBT_ENV_SECRET_google_dataset }}
   KEYFILE_CONTENTS: ${{ secrets.KEYFILE_CONTENTS }}
