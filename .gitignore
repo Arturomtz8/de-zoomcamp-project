@@ -202,3 +202,4 @@ pyrightconfig.json
 *.backup
 
 .vscode/settings.json
+README_INP.md 
