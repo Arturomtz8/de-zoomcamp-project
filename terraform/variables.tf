@@ -24,15 +24,3 @@ variable "BQ_DATASET" {
   type        = string
   default     = "trips_data_all"
 }
-
-variable "uri_posts_ghosts" {
-  description = "The bucket uri where parquet file of posts is located"
-  type        = string
-
-}
-
-variable "uri_comments_ghosts" {
-  description = "The bucket uri where parquet file of comments is located"
-  type        = string
-
-}
