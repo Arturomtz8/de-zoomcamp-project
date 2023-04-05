@@ -41,8 +41,8 @@ select
     post_fullname,
     post_title,
     post_text,
-    num_comments,
-    post_score,
+    cast(num_comments as int64) as num_comments,
+    cast(post_score as int64) as post_score,
     post_url,
     created_at as post_created_at,
     {{ extract_hour("created_at") }} as hour_post_created_at,
@@ -50,5 +50,5 @@ select
     over_18 as post_over_18,
     spoiler as post_spoiler,
     stickied as post_stickied,
-    upvote_ratio as post_upvote_ratio
+    cast(upvote_ratio as float64) as post_upvote_ratio
 from raw_posts_ghosts
