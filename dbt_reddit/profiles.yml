@@ -27,8 +27,8 @@ dbt_reddit:
       type: bigquery
       method: service-account
       keyfile: "{{ env_var('DBT_GOOGLE_KEYFILE') }}"
-      project: "{{ env_var('DBT_ENV_SECRET_project_id') }}"
-      dataset: "{{ env_var('DBT_ENV_SECRET_google_dataset') }}"
+      project: "{{ env_var('DBT_GOOGLE_PROJECT') }}"
+      dataset: "{{ env_var('DBT_GOOGLE_DATASET') }}"
       timeout_seconds: 300
       location: us-west1
       priority: interactive

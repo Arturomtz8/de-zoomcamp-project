@@ -10,8 +10,8 @@ on:
 
 env:
   # DBT_PROFILES_DIR: ./dbt_reddit
-  DBT_GOOGLE_PROJECT: ${{ secrets.DBT_ENV_SECRET_project_id }}
-  DBT_GOOGLE_DATASET: ${{ secrets.DBT_ENV_SECRET_google_dataset }}
+  DBT_GOOGLE_PROJECT: ${{ secrets.DBT_ENV_SECRET_PROJECT_ID }}
+  DBT_GOOGLE_DATASET: ${{ secrets.DBT_ENV_SECRET_GOOGLE_DATASET }}
   KEYFILE_CONTENTS: ${{ secrets.KEYFILE_CONTENTS }}
   DBT_GOOGLE_KEYFILE: /tmp/google/google-service-account.json
 
