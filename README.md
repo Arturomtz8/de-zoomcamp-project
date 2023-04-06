@@ -22,7 +22,7 @@ The data was obtained from the [PRAW - The Python Reddit API Wrapper](https://pr
  - [Google Looker Studio](https://lookerstudio.google.com)
 
 ## Data pipeline
-A lot of the orchestration of the project is done via Github Actions located in [link to code](.github/workflows/) and Prefect [link to code](src/flows/).
+A lot of the orchestration of the project is done via Github Actions located in [.github/workflows/](.github/workflows/) and Prefect [src/flows/](src/flows/).
 
 Github Actions is mainly used for running jobs (python scripts and dbt commands) via cronjob and Prefect is responsible for creating the flows and connecting to Google Cloud services in a secure way using [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209). 
 
@@ -53,7 +53,7 @@ Finally, at 4:10 am I run dbt for cleaning and preparing de data from Big Query 
 
 - Use Prefect Cloud for configuring Secrets and Blocks that are used in the [flows scripts](src/flows/). Here is a [guide](https://docs.prefect.io/ui/cloud-quickstart/) for configuring Prefect Cloud. And here are explained the concepts of [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209)
 
-- Create a project in dbt with the name **dbt_reddit_**:
+- Create a project in dbt with the name **dbt_reddit**:
     ```bash
     $ poetry run dbt init dbt_reddit
     ```
@@ -65,6 +65,7 @@ Finally, at 4:10 am I run dbt for cleaning and preparing de data from Big Query 
     - KEYFILE_CONTENTS (the contents of the json file from your google service account)
     - PREFECT_API_KEY (your api key for connecting to Prefect Cloud)
     - PREFECT_WORKSPACE (the name of your workspace in Prefect Cloud)
+
     The following variables were created when configuring [PRAW](https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#prerequisites):
     - REDDIT_CLIENT_ID
     - REDDIT_CLIENT_SECRET
