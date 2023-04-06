@@ -52,3 +52,4 @@ select
     stickied as post_stickied,
     cast(upvote_ratio as float64) as post_upvote_ratio
 from raw_posts_ghosts
+where created_at >= timestamp('2023-01-18 00:00:00')
