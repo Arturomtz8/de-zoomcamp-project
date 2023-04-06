@@ -1,8 +1,10 @@
 # Paranormal subreddits ELT
 
 ## Objective
-This project extracts, loads and trasforms the top posts and comments from the subreddits:Ghoststories, Ghosts, Paranormal, ParanormalEncounters.
-By doing this, I want to know at which hour the posts more voted are posted, the ratio between upvoting score vs number of comments and the most common words in posts and comments from the subreddits
+This project extracts, loads and trasforms the top posts and comments from the subreddits: Ghoststories, Ghosts, Paranormal, ParanormalEncounters.
+
+I want to know at which hour the posts most voted are posted, the ratio between upvoting score vs number of comments and the most common words in posts and comments from the subreddits.
+
 The data was obtained from the [PRAW - The Python Reddit API Wrapper](https://praw.readthedocs.io/en/stable/index.html), which makes it easier to interact with the posts, comments, and subreddits from Reddit's social app.
 
 ## Architecture
@@ -22,13 +24,15 @@ The data was obtained from the [PRAW - The Python Reddit API Wrapper](https://pr
  - [Google Looker Studio](https://lookerstudio.google.com)
 
 ## Data pipeline
-A lot of the orchestration of the project is done via Github Actions located in [.github/workflows/](.github/workflows/) and Prefect [src/flows/](src/flows/).
+A lot of the orchestration of the project is done via Github Actions located in [.github/workflows/](.github/workflows/) and Prefect flows which are in [src/flows/](src/flows/).
 
-Github Actions is mainly used for running jobs (python scripts and dbt commands) via cronjob and Prefect is responsible for creating the flows and connecting to Google Cloud services in a secure way using [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209). 
+Github Actions is mainly used for running jobs (python scripts and dbt commands) via a schedule or cronjob and Prefect is responsible for creating the flows and connecting to Google Cloud services in a secure way using [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209). 
 
 I query the top posts every day from the mentioned subreddits 4 times per day (3 am, 9 am, 15 pm and 21 pm) in order to obtain the posts that were popular during all the day and save them in Google Cloud Storage and Big Query.
 
 At 3:50 am I also query the comments from each post for obtaining the most frequent words in comments and info about the comments. Every time that I query the PRAW, I make sure to not include posts or comments that I have already in Google Cloud Storage.
+
+Finally, at 4:10 am I run dbt for cleaning and preparing de data from Big Query and serve it in Google Looker Studio.
 
 With all the posts and comments saved in Google Cloud Storage, I also create wordclouds and graphs from the most frequent words in the post title, post text, and comment body:
 <p align="center">
@@ -36,14 +40,19 @@ With all the posts and comments saved in Google Cloud Storage, I also create wor
     <img src="data/img/words_in_comment_body.png">
 </p>
 
-Finally, at 4:10 am I run dbt for cleaning and preparing de data from Big Query and serve it in Google Looker Studio.
-
 ## Prerequisites for running the project
-- Use terraform for building the necessary infrastructure in Google Cloud. You will need to create 1 environment variable in your terminal with the name **TF_VAR_project**:
+- Create a project in Google Cloud, you can follow the [docs](https://developers.google.com/workspace/guides/create-project)
+
+- Use terraform for building the necessary infrastructure in Google Cloud. You will need to create 1 environment variable in your terminal with the name **TF_VAR_project** that contains your project id from Google Cloud:
     ```bash
     $ export TF_VAR_project=your_project_id_from_google_cloud
     ```
-    - Then run `cd terraform/` & `terraform plan -out init_infra.tfplan` and `terraform apply init_infra.tfplan` to create the infra
+    - Then run:
+        ```bash
+        $ cd terraform/
+        $ terraform plan -out init_infra.tfplan
+        $ terraform apply init_infra.tfplan
+        ```
 
 - Python >=3.9 and <3.11
 
