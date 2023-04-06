@@ -41,11 +41,28 @@ Finally, at 4:10 am I run dbt for cleaning and preparing de data from Big Query 
     ```bash
     $ export TF_VAR_project=your_project_id_from_google_cloud
     ```
+    - Then run `cd terraform/` & `terraform plan -out init_infra.tfplan` and `terraform apply init_infra.tfplan` to create the infra
 
-- Download [Poetry]((https://python-poetry.org/docs/)) and run the command 'poetry install' . This command will take the dependencies located in [pyproject.toml](pyproject.toml) and create a new environment that will help you to sync your dependencies and run the python scripts easily.
+- Python = ">=3.9,<3.11"
+
+- Download [Poetry]((https://python-poetry.org/docs/)) and run the command `poetry install` . This command will take the dependencies located in [pyproject.toml](pyproject.toml) and create a new environment that will help you run the python scripts easily.
 
 - You will also have to create an agent that will interact with PRAW, here are the steps for doing it: https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#prerequisites
 
-- Use Prefect Cloud for configuring Secrets and Blocks that are used in the [flows scripts](src/flows/)
+- Use Prefect Cloud for configuring Secrets and Blocks that are used in the [flows scripts](src/flows/). Here is a [guide](https://docs.prefect.io/ui/cloud-quickstart/) for configuring Prefect Cloud
 
-Take into account that you must have your environment variables and secrets stored in your terminal or in your repo. If you want to run it in Github Actions, you will have to create
+- Create a project in dbt with the name _dbt_reddit_ :
+    ```bash
+    $ poetry run dbt init dbt_reddit
+    ```
+
+- Optional: If you want to run it in Github Actions, you will have to create the following _secrets_ for your repo:
+
+## Run the scripts
+It is **mandatory** to have done the steps in [Prerequisites section](#prerequisites-for-running-the-project)
+
+- To run the prefect scripts simply type in the root dir of the repo:
+    ```bash
+    $ poetry run python src/flows/reddit_posts_scraper.py
+    ```
+
