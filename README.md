@@ -1,11 +1,7 @@
 # Paranormal subreddits ELT
 
 ## Objective
-This project extracts, loads and trasforms the top posts and comments from the subreddits: Ghoststories, Ghosts, Paranormal, ParanormalEncounters.
-
-I want to know at which hour the posts most voted are posted, the ratio between upvoting score vs number of comments and the most common words in posts and comments from the subreddits.
-
-The data was obtained from the [PRAW - The Python Reddit API Wrapper](https://praw.readthedocs.io/en/stable/index.html), which makes it easier to interact with the posts, comments, and subreddits from Reddit's social app.
+This project involves extracting, loading, and transforming top posts and comments from four subreddits: Ghoststories, Ghosts, Paranormal, and ParanormalEncounters. By analyzing the data, I aim to determine the hourly distribution of posts, the correlation between post scores and comment numbers, the average number of comments per post, the maximum post score, the number of unique authors, and the most frequently used words in posts' text. To access the data, I use [PRAW](https://praw.readthedocs.io/en/stable/index.html), which is a Python Reddit API Wrapper that simplifies the process of interacting with Reddit's posts, comments, and subreddits.
 
 ## Architecture
 <p align="center">
@@ -26,37 +22,39 @@ The data was obtained from the [PRAW - The Python Reddit API Wrapper](https://pr
 ## Data pipeline
 A lot of the orchestration of the project is done via Github Actions located in [.github/workflows/](.github/workflows/) and Prefect flows which are in [src/flows/](src/flows/).
 
-Github Actions is mainly used for running jobs (python scripts and dbt commands) via a schedule or cronjob and Prefect is responsible for creating the flows and connecting to Google Cloud services in a secure way using [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209). 
+Github Actions is mainly used for running jobs (python scripts and dbt commands) via a cronjob and Prefect is responsible for creating the flows and connecting to Google Cloud services in a secure way using [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209).
 
-I query the top posts every day from the mentioned subreddits 4 times per day (3 am, 9 am, 15 pm and 21 pm) in order to obtain the posts that were popular during all the day and save them in Google Cloud Storage and Big Query.
+To ensure data consistency, each query made to PRAW stores the results in both Google Cloud Storage and Big Query. I also take care to exclude any posts or comments already stored in these locations to avoid duplication.
 
-At 3:50 am I also query the comments from each post for obtaining the most frequent words in comments and info about the comments. Every time that I query the PRAW, I make sure to not include posts or comments that I have already in Google Cloud Storage.
+At four intervals throughout the day (3 am, 9 am, 3 pm, and 9 pm), I execute a query on the top posts from the selected subreddits.
 
-Finally, at 4:10 am I run dbt for cleaning and preparing de data from Big Query and serve it in Google Looker Studio.
+At 3:50 am, I query the comments of each post to extract information about the most commonly used words and other details.
 
-With all the posts and comments saved in Google Cloud Storage, I also create wordclouds and graphs from the most frequent words in the post title, post text, and comment body:
+Finally, at 4:10 am, I use dbt to clean and prepare the data stored in Big Query for analysis, and then serve it in Google Looker Studio.
+
+With all the posts and comments saved in Google Cloud Storage, I generate wordclouds and graphs that display the most commonly used words found in the post titles, post text, and comment bodies, which are saved [here](data/img/):
 <p align="center">
     <img src="data/img/wordcloud_post_title.png">
-    <img src="data/img/words_in_comment_body.png">
 </p>
 
 ## Prerequisites for running the project
-- Create a project in Google Cloud, you can follow the [docs](https://developers.google.com/workspace/guides/create-project)
+- In case that you don't have one, create a project in Google Cloud, you can follow the [docs](https://developers.google.com/workspace/guides/create-project)
 
-- Use terraform for building the necessary infrastructure in Google Cloud. You will need to create 1 environment variable in your terminal with the name **TF_VAR_project** that contains your project id from Google Cloud:
-    ```bash
-    $ export TF_VAR_project=your_project_id_from_google_cloud
-    ```
-    - Then run:
+- Download [Terraform](https://developer.hashicorp.com/terraform/downloads) and move into the terraform folder `cd terraform/` and run `terraform init` for initializing a working directory containing Terraform configuration files
+
+    - Create one environment variable in your terminal with the name **TF_VAR_project** that contains your project id from Google Cloud:
         ```bash
-        $ cd terraform/
+        $ export TF_VAR_project=your_project_id_from_google_cloud
+        ```
+    - Then build the infraestructure with the following commands:
+        ```bash
         $ terraform plan -out init_infra.tfplan
         $ terraform apply init_infra.tfplan
         ```
 
 - Python >=3.9 and <3.11
 
-- Install Poetry following the [docs]((https://python-poetry.org/docs/)) and run the command `poetry install` . This command will take the dependencies located in [pyproject.toml](pyproject.toml) and create a new environment that will help you run the python scripts easily and keep the same versions of the libraries that I use.
+- Install Poetry following the [docs](https://python-poetry.org/docs/) and run the command `poetry install` . This command will take the dependencies located in [pyproject.toml](pyproject.toml) and create a new environment that will help you run the python scripts easily and keep the same versions of the libraries that I use
 
 - You will also have to create an agent that will interact with PRAW, here are the steps for doing it: https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#prerequisites
 
@@ -75,12 +73,6 @@ With all the posts and comments saved in Google Cloud Storage, I also create wor
     - PREFECT_API_KEY (your api key for connecting to Prefect Cloud)
     - PREFECT_WORKSPACE (the name of your workspace in Prefect Cloud)
 
-    The following variables were created when configuring [PRAW](https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#prerequisites):
-    - REDDIT_CLIENT_ID
-    - REDDIT_CLIENT_SECRET
-    - REDDIT_USERNAME
-    - REDDIT_USER_AGENT
-
 ## Run the scripts
 It is **mandatory** to have done the steps in [Prerequisites section](#prerequisites-for-running-the-project)
 
@@ -88,4 +80,11 @@ It is **mandatory** to have done the steps in [Prerequisites section](#prerequis
     ```bash
     $ poetry run python src/flows/reddit_posts_scraper.py
     $ poetry run python src/flows/reddit_comments_scraper.py
+    ```
+- To update the Big Query tables with the contents of Google Cloud Storage, you will have to run:
+    ```bash
+    # for updating the Big Query table of posts
+    $ poetry run python src/flows/update_posts_in_bq.py
+    # for updating the Big Query table of comments
+    $ poetry run python src/flows/update_comments_in_bq.py
     ```
