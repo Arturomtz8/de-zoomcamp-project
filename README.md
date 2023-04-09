@@ -1,7 +1,7 @@
 # Paranormal subreddits ELT
 
 ## Objective
-This project involves extracting, loading, and transforming top posts and comments from four subreddits: Ghoststories, Ghosts, Paranormal, and ParanormalEncounters. By analyzing the data, I aim to determine the hourly distribution of posts, the correlation between post scores and comment numbers, the average number of comments per post, the maximum post score, the number of unique authors, and the most frequently used words in posts' text. To access the data, I use [PRAW](https://praw.readthedocs.io/en/stable/index.html), which is a Python Reddit API Wrapper that simplifies the process of interacting with Reddit's posts, comments, and subreddits.
+This project involves extracting, loading, and transforming top posts and comments from four subreddits: Ghoststories, Ghosts, Paranormal, and ParanormalEncounters. By analyzing the data, I aim to determine the hourly distribution of posts, the correlation between post scores and comment numbers, the average number of comments per post, the maximum post score, the number of unique authors, and the most frequently used words in posts' text. To access the data, I use [PRAW](https://praw.readthedocs.io/en/stable/index.html), which is the Python Reddit API Wrapper that simplifies the process of interacting with Reddit's posts, comments, and subreddits.
 
 ## Architecture
 <p align="center">
@@ -54,7 +54,7 @@ With all the posts and comments saved in Google Cloud Storage, I generate wordcl
 
 - Python >=3.9 and <3.11
 
-- Install Poetry following the [docs](https://python-poetry.org/docs/) and run the command `poetry install` . This command will take the dependencies located in [pyproject.toml](pyproject.toml) and create a new environment that will help you run the python scripts easily and keep the same versions of the libraries that I use
+- To set up the required dependencies for running the Python scripts in this repository, follow the instructions in the [documentation](https://python-poetry.org/docs/) to install Poetry. Then, navigate to the root directory of the repository and run the command `poetry install`. This command creates a new environment based on the dependencies specified in [pyproject.toml](pyproject.toml), ensuring that you have the same library versions as I use and making it easy to run the scripts
 
 - You will also have to create an agent that will interact with PRAW, here are the steps for doing it: https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#prerequisites
 
@@ -81,6 +81,7 @@ It is **mandatory** to have done the steps in [Prerequisites section](#prerequis
     $ poetry run python src/flows/reddit_posts_scraper.py
     $ poetry run python src/flows/reddit_comments_scraper.py
     ```
+
 - To update the Big Query tables with the contents of Google Cloud Storage, you will have to run:
     ```bash
     # for updating the Big Query table of posts
@@ -88,3 +89,21 @@ It is **mandatory** to have done the steps in [Prerequisites section](#prerequis
     # for updating the Big Query table of comments
     $ poetry run python src/flows/update_comments_in_bq.py
     ```
+
+- To generate plots of the most commonly used words in the titles, text, and comments of the posts, run:
+    ```bash
+    $ poetry run python src/flows/create_plots.py
+    ```
+
+- To run dbt models:
+    ```bash
+    $ cd dbt_reddit/
+    $ poetry run dbt run
+    ``` 
+
+## The dashboard
+<p align="center">
+    <img src="data/img/dashboard_overview.png">
+</p>
+
+[Link](https://lookerstudio.google.com/reporting/cee3df4d-cd34-4cb6-98c3-5031a62b0636) to the dashboard
