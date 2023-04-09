@@ -106,4 +106,4 @@ It is **mandatory** to have done the steps in [Prerequisites section](#prerequis
     <img src="data/img/dashboard_overview.png">
 </p>
 
-[Link](https://lookerstudio.google.com/reporting/cee3df4d-cd34-4cb6-98c3-5031a62b0636) to the dashboard
+[Link](https://lookerstudio.google.com/reporting/cee3df4d-cd34-4cb6-98c3-5031a62b0636){:target="_blank"} to the dashboard
