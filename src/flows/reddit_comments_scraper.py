@@ -3,8 +3,11 @@ from pathlib import Path
 import pandas as pd
 import praw
 import prawcore
-from gc_funcs.reader_writer import (get_comments_from_gcs, get_posts_from_gcs,
-                                    write_to_gcs)
+from gc_funcs.reader_writer import (
+    get_comments_from_gcs,
+    get_posts_from_gcs,
+    write_to_gcs,
+)
 from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
@@ -23,15 +26,15 @@ def extract_comments(
     # print(len(posts_url_from_comments_list_in_gcs))
     # print(len(df_posts_from_bucket["post_url"]))
     all_comments_list = list()
-    REDDIT_CLIENT_ID = Secret.load("reddit-client-id")
-    REDDIT_CLIENT_SECRET = Secret.load("reddit-client-secret")
-    REDDIT_USER_AGENT = Secret.load("reddit-user-agent")
-    REDDIT_USERNAME = Secret.load("reddit-username")
+    reddit_client_id = Secret.load("reddit-client-id")
+    reddit_client_secret = Secret.load("reddit-client-secret")
+    reddit_user_agent = Secret.load("reddit-user-agent")
+    reddit_username = Secret.load("reddit-username")
     reddit = praw.Reddit(
-        client_id=REDDIT_CLIENT_ID.get(),
-        client_secret=REDDIT_CLIENT_SECRET.get(),
-        user_agent=REDDIT_USER_AGENT.get(),
-        username=REDDIT_USERNAME.get(),
+        client_id=reddit_client_id.get(),
+        client_secret=reddit_client_secret.get(),
+        user_agent=reddit_user_agent.get(),
+        username=reddit_username.get(),
     )
     for post_url in posts_url_from_posts:
         if post_url not in posts_url_from_comments:
@@ -45,7 +48,7 @@ def extract_comments(
                         or top_level_comment.id in comment_id_from_comments
                     ):
                         print(
-                            "comment already in dataset or comment with more comments structure"
+                            "comment already in dataset or comment with more comments structure"  # noqa: E501
                         )
                         continue
                     print("new comments found")
@@ -104,14 +107,14 @@ def concat_df(
 
 @task(log_prints=True)
 def write_local_and_to_gcs(df: pd.DataFrame) -> None:
-    local_path = Path(f"data/ghost_stories/comments_ghosts_stories.parquet")
+    local_path = Path("data/ghost_stories/comments_ghosts_stories.parquet")
     local_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(local_path, compression="gzip")
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
 
 
 @flow(log_prints=True)
-def scrape_reddit_comments():
+def scrape_reddit_comments() -> None:
     df_posts_from_bucket = get_posts_from_gcs()
     df_comments_from_bucket = get_comments_from_gcs()
     df_raw = extract_comments(df_posts_from_bucket, df_comments_from_bucket)

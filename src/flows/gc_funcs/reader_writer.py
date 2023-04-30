@@ -10,20 +10,16 @@ gcs_block: GCS = GCS.load("ghost-stories-bucket-path")
 
 
 def get_posts_from_gcs() -> pd.DataFrame:
-    """
-    Read parquet posts from google cloud storage and return df
-    """
+    """Read parquet posts from google cloud storage and return df."""
     posts_content = gcs_block.read_path("posts_ghosts_stories.parquet")
-    df = pd.read_parquet((io.BytesIO(posts_content)))
+    df = pd.read_parquet(io.BytesIO(posts_content))
     return df
 
 
 def get_comments_from_gcs() -> pd.DataFrame:
-    """
-    Read parquet comments from google cloud storage and return df
-    """
+    """Read parquet comments from google cloud storage and return df."""
     comments_content = gcs_block.read_path("comments_ghosts_stories.parquet")
-    df = pd.read_parquet((io.BytesIO(comments_content)))
+    df = pd.read_parquet(io.BytesIO(comments_content))
     return df
 
 

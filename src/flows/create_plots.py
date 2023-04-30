@@ -1,17 +1,21 @@
 import random
 from collections import Counter
 from pathlib import Path
-from typing import List
 
 import matplotlib
 import matplotlib.pyplot as plt
 import nltk
 import pandas as pd
 import seaborn as sns
-from gc_funcs.reader_writer import (get_comments_from_gcs, get_posts_from_gcs,
-                                    write_to_gcs)
+from gc_funcs.reader_writer import (
+    get_comments_from_gcs,
+    get_posts_from_gcs,
+    write_to_gcs,
+)
+
 # Lemmatizer helps to reduce words to the base form
 from nltk.stem import WordNetLemmatizer
+
 # This allows to create individual objects from a bog of words
 from nltk.tokenize import word_tokenize
 from prefect import flow, task
@@ -21,12 +25,12 @@ from wordcloud import WordCloud
 def grey_color_func(
     word, font_size, position, orientation, random_state=None, **kwargs
 ):
-    return "hsl(0, 0%%, %d%%)" % random.randint(60, 100)
+    return "hsl(0, 0%%, %d%%)" % random.randint(60, 100)  # noqa: S311
 
 
 @task(log_prints=True)
 def create_word_freq_df(
-    data_file_path: Path, column_name: str, stopwords_list: List[str]
+    data_file_path: Path, column_name: str, stopwords_list: list[str]
 ) -> pd.DataFrame:
     if column_name in ["post_title", "post_text"]:
         df = get_posts_from_gcs()
@@ -37,7 +41,8 @@ def create_word_freq_df(
     # creates tokens, creates lower class, removes numbers and lemmatizes the words
     new_tokens = word_tokenize(column_to_string)
     new_tokens = [t.lower() for t in new_tokens]
-    new_tokens = [t for t in new_tokens if t.isalpha() and len(t) >= 2]
+    min_len_tokens = 2
+    new_tokens = [t for t in new_tokens if t.isalpha() and len(t) >= min_len_tokens]
 
     lemmatizer = WordNetLemmatizer()
     new_tokens = [lemmatizer.lemmatize(t) for t in new_tokens]
@@ -62,7 +67,7 @@ def create_word_freq_df(
 def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
     fig, axes = plt.subplots()
     fig.suptitle(
-        "Data taken from subreddits: Ghoststories, Ghosts, Paranormal and ParanormalEncounters"
+        "Data taken from subreddits: Ghoststories, Ghosts, Paranormal and ParanormalEncounters"  # noqa: E501
     )  # or plt.suptitle('Main title')
     if "words_in_post_title" in list(df.columns):
         sns.barplot(
@@ -94,7 +99,7 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
 
 @task(log_prints=True)
 def create_wordcloud(
-    img_file_path: Path, column_name: str, stopwords_list=List[str]
+    img_file_path: Path, column_name: str, stopwords_list=list[str]
 ) -> Path:
     if column_name in ["post_title", "post_text"]:
         df = get_posts_from_gcs()
@@ -130,8 +135,8 @@ def create_plots():
     # For more information and other ways of solving it see
     #  https://matplotlib.org/stable/users/explain/backends.html
     matplotlib.use("agg")
-    raw_data_file_path = Path(f"data/ghost_stories")
-    img_file_path = Path(f"data/img")
+    raw_data_file_path = Path("data/ghost_stories")
+    img_file_path = Path("data/img")
     stopwords_personalized = nltk.corpus.stopwords.words("english")
     new_stopwords = [
         "u",

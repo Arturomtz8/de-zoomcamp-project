@@ -22,6 +22,7 @@ wordcloud = "^1.8.2"
 gcsfs = "^2023.3.0"
 dbt-bigquery = "^1.4.3"
 shandy-sqlfmt = "^0.17.0"
+ruff = "^0.0.263"
 
 
 
@@ -33,3 +34,37 @@ isort = "^5.11.4"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+
+[tool.ruff]
+
+target-version = "py39"
+
+select = [
+  "E",   # pycodestyle
+  "W",   # pycodestyle
+  "F",   # pyflakes
+  "UP",  # pyupgrade
+  "I",   # isort
+  "N",   # naming
+  "UP",  # pyupgrade
+  "ANN", # flake8-annotations
+  "S",   # flake8-bandit
+  "A",   # flake8-builtins
+  "C90", # mccabe
+  "TRY", # tryceratops - clean try and except
+  "PL",  # Pylint
+  "SIM", # flake8-simplify
+  "ARG", # flake8-unused-arguments
+]
+exclude = [ 
+  "D"  # pydocstyle
+]
+
+# Allow autofix for all enabled rules (when `--fix`) is provided.
+fixable = ["E", "D", "N", "F", "I"]
+
+[tool.ruff.mccabe]
+max-complexity = 7

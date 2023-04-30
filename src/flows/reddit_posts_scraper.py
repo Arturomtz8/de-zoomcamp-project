@@ -12,15 +12,15 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
     all_posts_list = list()
     post_ids_list_in_gcs = df_from_bucket["post_id"].tolist()
     post_urls_list_in_gcs = df_from_bucket["post_url"].tolist()
-    REDDIT_CLIENT_ID = Secret.load("reddit-client-id")
-    REDDIT_CLIENT_SECRET = Secret.load("reddit-client-secret")
-    REDDIT_USER_AGENT = Secret.load("reddit-user-agent")
-    REDDIT_USERNAME = Secret.load("reddit-username")
+    reddit_client_id = Secret.load("reddit-client-id")
+    reddit_client_secret = Secret.load("reddit-client-secret")
+    reddit_user_agent = Secret.load("reddit-user-agent")
+    reddit_username = Secret.load("reddit-username")
     reddit = praw.Reddit(
-        client_id=REDDIT_CLIENT_ID.get(),
-        client_secret=REDDIT_CLIENT_SECRET.get(),
-        user_agent=REDDIT_USER_AGENT.get(),
-        username=REDDIT_USERNAME.get(),
+        client_id=reddit_client_id.get(),
+        client_secret=reddit_client_secret.get(),
+        user_agent=reddit_user_agent.get(),
+        username=reddit_username.get(),
     )
 
     subreddit = reddit.subreddit(subreddit_name)
@@ -88,12 +88,6 @@ def extract_posts(subreddit_name: str, df_from_bucket: pd.DataFrame) -> pd.DataF
 @task(log_prints=True)
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df["created_at"] = pd.to_datetime(df["created_at"], unit="s")
-    try:
-        df["voting_end_timestamp"] = pd.to_datetime(
-            df["voting_end_timestamp"], unit="ms"
-        )
-    except KeyError:
-        pass
     return df
 
 
@@ -105,7 +99,7 @@ def concat_df(new_df: pd.DataFrame, df_posts_from_bucket: pd.DataFrame) -> pd.Da
 
 @task(log_prints=True)
 def write_local_and_to_gcs(df: pd.DataFrame) -> None:
-    local_path = Path(f"data/ghost_stories/posts_ghosts_stories.parquet")
+    local_path = Path("data/ghost_stories/posts_ghosts_stories.parquet")
     local_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_parquet(local_path, compression="gzip")
     write_to_gcs(local_path=local_path, gcs_bucket_path=local_path)
