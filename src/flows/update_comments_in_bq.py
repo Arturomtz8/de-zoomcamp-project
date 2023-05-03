@@ -23,7 +23,7 @@ def write_bq(
 
 
 @flow()
-def update_comments_table_in_bq():
+def update_comments_table_in_bq() -> None:
     df_comments_from_gcs = get_comments_from_gcs()
     write_bq("reddit_data.raw_comments_ghosts", df_comments_from_gcs)
 
