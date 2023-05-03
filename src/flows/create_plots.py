@@ -23,8 +23,13 @@ from wordcloud import WordCloud
 
 
 def grey_color_func(
-    word, font_size, position, orientation, random_state=None, **kwargs
-):
+    word,  # noqa: ANN001, ARG001
+    font_size,  # noqa: ANN001, ARG001
+    position,  # noqa: ANN001, ARG001
+    orientation,  # noqa: ANN001, ARG001
+    random_state=None,  # noqa: ANN001, ARG001
+    **kwargs,  # noqa: ANN001, ANN003, ARG001
+) -> None:
     return "hsl(0, 0%%, %d%%)" % random.randint(60, 100)  # noqa: S311
 
 
@@ -99,7 +104,7 @@ def create_barplot(img_file_path: Path, df: pd.DataFrame) -> None:
 
 @task(log_prints=True)
 def create_wordcloud(
-    img_file_path: Path, column_name: str, stopwords_list=list[str]
+    img_file_path: Path, column_name: str, stopwords_list: list[str]
 ) -> Path:
     if column_name in ["post_title", "post_text"]:
         df = get_posts_from_gcs()
@@ -129,7 +134,7 @@ def create_wordcloud(
 
 
 @flow()
-def create_plots():
+def create_plots() -> None:
     # set agg to prevent error from prefect
     # agg, is a non-interactive backend that can only write to files.
     # For more information and other ways of solving it see

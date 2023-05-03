@@ -54,13 +54,13 @@ select = [
   "S",   # flake8-bandit
   "A",   # flake8-builtins
   "C90", # mccabe
-  "TRY", # tryceratops - clean try and except
   "PL",  # Pylint
   "SIM", # flake8-simplify
   "ARG", # flake8-unused-arguments
 ]
 exclude = [ 
-  "D"  # pydocstyle
+  "D",  # pydocstyle
+  "TRY", # tryceratops - clean try and except
 ]
 
 # Allow autofix for all enabled rules (when `--fix`) is provided.
