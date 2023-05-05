@@ -1,12 +1,12 @@
 name: Scrape daily posts from subreddits
 
-on:
-  schedule:
-    - cron: '0 9,15,21,3 * * *'
 # on:
-#   push:
-#     branches:
-#       - main
+#   schedule:
+#     - cron: '0 9,15,21,3 * * *'
+on:
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,15 +19,15 @@ jobs:
     - name: Run image
       uses: abatilo/actions-poetry@v2
       with:
-        poetry-version: "1.1.15"
+        poetry-version: "1.4.2"
     - name: Install poetry dependencies
       run: poetry install
-    - name: Run black
-      run: |
-        poetry run black .
-    - name: Run isort
-      run: |
-        poetry run isort .
+    # - name: Run black
+    #   run: |
+    #     poetry run black .
+    # - name: Run isort
+    #   run: |
+    #     poetry run isort .
     - name: Prefect Cloud login
       run: |
         poetry run prefect config set PREFECT_API_KEY=${{secrets.PREFECT_API_KEY}} 
