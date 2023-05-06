@@ -6,8 +6,10 @@ import praw
 import pytest
 from prefect.blocks.system import Secret
 
-from flows.gc_funcs.reader_writer import get_comments_from_gcs  # noqa: E402
-from flows.gc_funcs.reader_writer import get_posts_from_gcs
+from flows.gc_funcs.reader_writer import (
+    get_comments_from_gcs,  # noqa: E402
+    get_posts_from_gcs,
+)
 
 
 @pytest.fixture()
@@ -31,7 +33,7 @@ def fixture_comments_from_gcs() -> pd.DataFrame:
 
 @pytest.fixture(scope="function")
 def fixture_get_secret() -> str:
-    def get_secret(secret_name: str):
+    def get_secret(secret_name: str) -> str:
         top_secret = Secret.load(secret_name)
         return top_secret.get()
 
@@ -39,7 +41,7 @@ def fixture_get_secret() -> str:
 
 
 @pytest.fixture(scope="function")
-def fixture_client_reddit(fixture_get_secret) -> praw.Reddit:
+def fixture_client_reddit(fixture_get_secret: pytest.fixture) -> praw.Reddit:
     reddit_client_id = fixture_get_secret("reddit-client-id")
     reddit_client_secret = fixture_get_secret("reddit-client-secret")
     reddit_user_agent = fixture_get_secret("reddit-user-agent")

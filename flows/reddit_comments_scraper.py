@@ -3,8 +3,11 @@ from pathlib import Path
 import pandas as pd
 import praw
 import prawcore
-from gc_funcs.reader_writer import (get_comments_from_gcs, get_posts_from_gcs,
-                                    write_to_gcs)
+from gc_funcs.reader_writer import (
+    get_comments_from_gcs,
+    get_posts_from_gcs,
+    write_to_gcs,
+)
 from praw.models import MoreComments
 from prefect import flow, task
 from prefect.blocks.system import Secret
