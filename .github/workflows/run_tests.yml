@@ -17,6 +17,10 @@ jobs:
         poetry-version: "1.4.2"
     - name: Install poetry dependencies
       run: poetry install
+    - name: Prefect Cloud login
+      run: |
+        poetry run prefect config set PREFECT_API_KEY=${{secrets.PREFECT_API_KEY}} 
+        poetry run prefect cloud workspace set --workspace "${{secrets.PREFECT_WORKSPACE}}"
     - name: Run ruff
       run: |
         poetry run ruff check . --fix
