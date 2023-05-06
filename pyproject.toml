@@ -63,8 +63,5 @@ exclude = [
   "TRY", # tryceratops - clean try and except
 ]
 
-# Allow autofix for all enabled rules (when `--fix`) is provided.
-fixable = ["E", "D", "N", "F", "I"]
-
 [tool.ruff.mccabe]
 max-complexity = 7

@@ -106,7 +106,7 @@ def write_local_and_to_gcs(df: pd.DataFrame) -> None:
 
 
 @flow()
-def scrape_reddit():
+def scrape_reddit() -> None:
     df_posts_from_bucket = get_posts_from_gcs()
     df_raw = extract_posts(
         subreddit_name="Ghoststories+Ghosts+Paranormal+ParanormalEncounters",

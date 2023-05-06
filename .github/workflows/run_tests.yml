@@ -1,0 +1,27 @@
+name: Run linters and tests
+
+on:
+  [push, pull_request]:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Run image
+      uses: abatilo/actions-poetry@v2
+      with:
+        poetry-version: "1.4.2"
+    - name: Install poetry dependencies
+      run: poetry install
+    - name: Run ruff
+      run: |
+        poetry run ruff check .
+    - name: Run pytest
+      run: |
+        poetry run pytest -s tests/test_posts_and_comments.py

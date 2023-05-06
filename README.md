@@ -20,7 +20,7 @@ This project involves extracting, loading, and transforming top posts and commen
  - [Google Looker Studio](https://lookerstudio.google.com)
 
 ## Data pipeline
-A lot of the orchestration of the project is done via Github Actions located in [.github/workflows/](.github/workflows/) and Prefect flows which are in [src/flows/](src/flows/).
+A lot of the orchestration of the project is done via Github Actions located in [.github/workflows/](.github/workflows/) and Prefect flows which are in [flows/](flows/).
 
 Github Actions is mainly used for running jobs (python scripts and dbt commands) via a cronjob and Prefect is responsible for creating the flows and connecting to Google Cloud services in a secure way using [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209).
 
@@ -58,7 +58,7 @@ With all the posts and comments saved in Google Cloud Storage, I generate wordcl
 
 - You will also have to create an agent that will interact with PRAW, here are the steps for doing it: https://praw.readthedocs.io/en/stable/getting_started/quick_start.html#prerequisites
 
-- Use Prefect Cloud for configuring Secrets and Blocks that are used in the [flows scripts](src/flows/). Here is a [guide](https://docs.prefect.io/ui/cloud-quickstart/) for configuring Prefect Cloud. And here are explained the concepts of [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209)
+- Use Prefect Cloud for configuring Secrets and Blocks that are used in the [flows scripts](flows/). Here is a [guide](https://docs.prefect.io/ui/cloud-quickstart/) for configuring Prefect Cloud. And here are explained the concepts of [Blocks](https://docs.prefect.io/concepts/blocks/) and [Secrets](https://discourse.prefect.io/t/how-to-securely-store-secrets-in-prefect-2-0/1209)
 
 - Create a project in dbt with the name **dbt_reddit**:
     ```bash
@@ -78,21 +78,21 @@ It is **mandatory** to have done the steps in [Prerequisites section](#prerequis
 
 - To run the prefect scripts and scrape the top posts and comments of the subreddits simply type in the root dir of the repo:
     ```bash
-    $ poetry run python src/flows/reddit_posts_scraper.py
-    $ poetry run python src/flows/reddit_comments_scraper.py
+    $ poetry run python flows/reddit_posts_scraper.py
+    $ poetry run python flows/reddit_comments_scraper.py
     ```
 
 - To update the Big Query tables with the contents of Google Cloud Storage, you will have to run:
     ```bash
     # for updating the Big Query table of posts
-    $ poetry run python src/flows/update_posts_in_bq.py
+    $ poetry run python flows/update_posts_in_bq.py
     # for updating the Big Query table of comments
-    $ poetry run python src/flows/update_comments_in_bq.py
+    $ poetry run python flows/update_comments_in_bq.py
     ```
 
 - To generate plots of the most commonly used words in the titles, text, and comments of the posts, run:
     ```bash
-    $ poetry run python src/flows/create_plots.py
+    $ poetry run python flows/create_plots.py
     ```
 
 - To run dbt models:
