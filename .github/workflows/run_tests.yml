@@ -1,9 +1,7 @@
 name: Run linters and tests
 
-on:
-  [push, pull_request]:
-    branches:
-      - main
+on: [push, pull_request]
+
 jobs:
   build:
     runs-on: ubuntu-latest
