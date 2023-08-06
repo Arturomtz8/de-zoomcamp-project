@@ -114,6 +114,8 @@ def scrape_reddit() -> None:
     )
     new_df = clean_df(df_raw)
     concatenated_df = concat_df(new_df, df_posts_from_bucket)
+    # delete dups because column "post_url" is being problematic
+    concatenated_df.drop_duplicates(subset=["post_url"], keep="last", inplace=True)
     write_local_and_to_gcs(concatenated_df)
 
 
