@@ -1,13 +1,9 @@
 name: Run dbt
 
 on:
-  schedule:
-    - cron: '10 4 * * *'
-
-# on:
-#   push:
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
 
 env:
   DBT_GOOGLE_PROJECT: ${{ secrets.DBT_ENV_SECRET_PROJECT_ID }}
