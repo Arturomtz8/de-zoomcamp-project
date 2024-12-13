@@ -1,12 +1,12 @@
 name: Scrape daily posts from subreddits
 
+#on:
+#  schedule:
+#    - cron: '0 9,15,21,3 * * *'
 on:
-  schedule:
-    - cron: '0 9,15,21,3 * * *'
-# on:
-#   push:
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
