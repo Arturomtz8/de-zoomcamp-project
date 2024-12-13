@@ -1,12 +1,12 @@
 name: Create plots
 
+#on:
+# schedule:
+#    - cron: '0 4 * * *'
 on:
-  schedule:
-    - cron: '0 4 * * *'
-# on:
-#   push:
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
